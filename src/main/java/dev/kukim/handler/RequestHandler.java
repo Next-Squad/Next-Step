@@ -1,4 +1,4 @@
-package webserver;
+package dev.kukim.handler;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

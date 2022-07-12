@@ -2,13 +2,9 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'dev.kukim'
+version '1.0.0'
 sourceCompatibility = '11'
-
-jar {
-    enabled = false
-}
 
 repositories {
     mavenCentral()
@@ -34,4 +30,17 @@ test {
 }
 
 task stage(dependsOn: ['build', 'clean'])
+
+jar {
+    manifest {
+        attributes('Main-Class': 'dev.kukim.WebServer')
+    }
+
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
