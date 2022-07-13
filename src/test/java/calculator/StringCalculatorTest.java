@@ -44,8 +44,11 @@ class StringCalculatorTest {
 
     @Test
     void emptyString() {
-        String text = "";
+        String text = null;
+        String text2 = "";
         int result = cal.add(text);
+        int result2 = cal.add(text2);
         assertThat(result).isZero();
+        assertThat(result2).isZero();
     }
 }
