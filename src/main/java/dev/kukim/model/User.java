@@ -1,4 +1,4 @@
-package model;
+package dev.kukim.model;
 
 public class User {
     private String userId;

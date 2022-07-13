@@ -1,11 +1,11 @@
-package db;
+package dev.kukim.db;
 
 import java.util.Collection;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-import model.User;
+import dev.kukim.model.User;
 
 public class DataBase {
     private static Map<String, User> users = Maps.newHashMap();

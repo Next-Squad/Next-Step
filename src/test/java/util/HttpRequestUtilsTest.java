@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.Map;
 
-
+import dev.kukim.util.HttpRequestUtils;
 import org.junit.jupiter.api.Test;
-import util.HttpRequestUtils.Pair;
+import dev.kukim.util.HttpRequestUtils.Pair;
 
 public class HttpRequestUtilsTest {
     @Test
