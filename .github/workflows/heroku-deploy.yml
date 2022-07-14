@@ -1,4 +1,4 @@
-name: Build and Depoly in AWS ec2
+name: Build and Depoly in heroku
 
 on:
   push:
