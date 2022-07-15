@@ -19,6 +19,7 @@
 - [책 Next Step 공식 저장소](https://github.com/slipp/jwp-book)
 - [책 Next Step 3 ~ 6장 실습 저장소](https://github.com/slipp/web-application-server)
 - [책 Next Step 7 ~ 6장 실습 저장소](https://github.com/slipp/jwp-basic)
+- [만들면서 배우는 Sprin Next-Step 과정 : 웹애플리케이션 서버 저장소](https://github.com/next-step/jwp-was)
 - [이펙티브 자바](http://www.yes24.com/Product/Goods/65551284)
 - [성공을 이끄는 팀 개발 실천 기술](http://www.yes24.com/Product/Goods/14725219)
 - [그림으로 공부하는 IT 인프라 구조](http://www.yes24.com/Product/Goods/95800974)
