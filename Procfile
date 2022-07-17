@@ -1,1 +1,1 @@
-web: java -jar build/libs/next-step-java-was-1.0.0.jar $PORT
+web: java -jar build/libs/java-was-1.0-SNAPSHOT.jar $PORT
