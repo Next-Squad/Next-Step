@@ -13,8 +13,7 @@ public class StringCalculator {
         int result = 0;
         String[] splitString = split(text);
         for (String s : splitString) {
-            int parseInt = toInt(s);
-            result += parseInt;
+            result += toInt(s);
         }
         return result;
     }
