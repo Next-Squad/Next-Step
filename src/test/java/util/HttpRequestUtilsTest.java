@@ -9,6 +9,16 @@ import org.junit.jupiter.api.Test;
 import util.HttpRequestUtils.Pair;
 
 public class HttpRequestUtilsTest {
+
+    @Test
+    void RequestLine을_파싱하여_Map에_담을_수_있다() {
+        String requestLine ="GET /index.html HTTP/1.1";
+        Map<String, String> map = HttpRequestUtils.parseRequestLine(requestLine);
+        assertThat(map).containsEntry("method", "GET");
+        assertThat(map).containsEntry("urlPath", "/index.html");
+        assertThat(map).containsEntry("protocol", "HTTP/1.1");
+    }
+
     @Test
     public void parseQueryString() {
         String queryString = "userId=javajigi";

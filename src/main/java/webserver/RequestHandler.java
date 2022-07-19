@@ -1,20 +1,19 @@
 package webserver;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
-
-import java.util.Arrays;
-import java.util.Objects;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -31,36 +30,37 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            InputStreamReader inputStreamReader = new InputStreamReader(in, StandardCharsets.UTF_8);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            String s;
             StringBuilder sb = new StringBuilder(); // StringBuiffer 를 쓰지않는 이유가 뭘까?
 
-            String requestLine = bufferedReader.readLine();
-            String[] parsedRequestLine = requestLine.split(" ");
-            System.out.println(Arrays.toString(parsedRequestLine));
-            String httpMethod = parsedRequestLine[0];
-            String urlPath = parsedRequestLine[1];
-            String httpProtocol = parsedRequestLine[2];
-            String[] parsedUrlPath = urlPath.split("\\?");
-            String parsedPath = parsedUrlPath[0];
-            String queryParams = parsedUrlPath[1];
+            String line = bufferedReader.readLine();
+            log.debug("RequestLine = {}", line);
+            if (line == null) {
+                return;
+            }
+            Map<String, String> parsedRequestLine = HttpRequestUtils.parseRequestLine(line);
+            String[] parsedUrlPath = parsedRequestLine.get("urlPath").split("\\?");
+
+            String url = parsedUrlPath[0];
+//            String queryParams = parsedUrlPath[1];
+
             byte[] body;
             DataOutputStream dos = new DataOutputStream(out);
-            if (parsedPath.equals("/index.html")) {
-                FileInputStream fileInputStream = new FileInputStream("./webapp/index.html");
-                body = fileInputStream.readAllBytes();
+            if (url.equals("/index.html")) {
+                body = Files.readAllBytes(new File("./webapp" + url).toPath());
             } else {
                 body = "Hello World".getBytes();
             }
             response200Header(dos, body.length);
             responseBody(dos, body);
 
-
-//            while ((s = bufferedReader.readLine()) != null) {
-//                sb.append(s);
-//                sb.append("\r\n");
-//            }
+            while (!line.equals((""))) {
+                line = bufferedReader.readLine();
+                sb.append(line);
+                sb.append("\r\n");
+                log.debug("Header = {}", line);
+            }
 
         } catch (IOException e) {
             log.error(e.getMessage());
