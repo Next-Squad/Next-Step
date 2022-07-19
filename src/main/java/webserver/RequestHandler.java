@@ -1,11 +1,18 @@
 package webserver;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import java.util.Arrays;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +30,38 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String s;
+            StringBuilder sb = new StringBuilder(); // StringBuiffer 를 쓰지않는 이유가 뭘까?
+
+            String requestLine = bufferedReader.readLine();
+            String[] parsedRequestLine = requestLine.split(" ");
+            System.out.println(Arrays.toString(parsedRequestLine));
+            String httpMethod = parsedRequestLine[0];
+            String urlPath = parsedRequestLine[1];
+            String httpProtocol = parsedRequestLine[2];
+            String[] parsedUrlPath = urlPath.split("\\?");
+            String parsedPath = parsedUrlPath[0];
+            String queryParams = parsedUrlPath[1];
+            byte[] body;
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
+            if (parsedPath.equals("/index.html")) {
+                FileInputStream fileInputStream = new FileInputStream("./webapp/index.html");
+                body = fileInputStream.readAllBytes();
+            } else {
+                body = "Hello World".getBytes();
+            }
             response200Header(dos, body.length);
             responseBody(dos, body);
+
+
+//            while ((s = bufferedReader.readLine()) != null) {
+//                sb.append(s);
+//                sb.append("\r\n");
+//            }
+
         } catch (IOException e) {
             log.error(e.getMessage());
         }
