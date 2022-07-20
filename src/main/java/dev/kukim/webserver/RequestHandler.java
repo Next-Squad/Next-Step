@@ -1,6 +1,5 @@
-package dev.kukim.handler;
+package dev.kukim.webserver;
 
-import dev.kukim.util.IOUtils;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -19,12 +18,13 @@ public class RequestHandler extends Thread {
 
 	private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-	private Socket connection;
+	private final Socket connection;
 
 	public RequestHandler(Socket connectionSocket) {
 		this.connection = connectionSocket;
 	}
 
+	@Override
 	public void run() {
 		log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
 			connection.getPort());
