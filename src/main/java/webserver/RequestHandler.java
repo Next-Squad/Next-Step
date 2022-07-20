@@ -9,8 +9,8 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
-import static util.LineParser.parseLine;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -32,19 +32,22 @@ public class RequestHandler extends Thread {
             log.debug("request line: {}", line);
             String url = parseLine(line);
 
+            int contentLength = 0;
             //2단계 + 3단계
             if (line == null) {
                 return;
             }
             while (!line.equals("")){
                 line = br.readLine();
+                if (line.contains("Content-Length")){
+                    contentLength = getContentLength(line);
+                }
                 log.debug("header: {}", line);
             }
 
             if (url.startsWith("/user/create")){
-                int index = url.indexOf("?");
-                String queryString = url.substring(index + 1);
-                Map<String, String> params = HttpRequestUtils.parseQueryString(queryString);
+                String body = IOUtils.readData(br, contentLength);
+                Map<String, String> params = HttpRequestUtils.parseQueryString(body);
                 User user = new User(params.get("userId"), params.get("password"), params.get("name"),
                         params.get("email"));
                 log.debug("user: {}", user);
@@ -77,5 +80,15 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private int getContentLength(String line) {
+        String[] split = line.split(":");
+        return Integer.parseInt(split[1].trim());
+    }
+
+    private String parseLine(String line){
+        String[] parsedLines = line.split(" ");
+        return parsedLines[1];
     }
 }
