@@ -1,5 +1,6 @@
 package webserver;
 
+import db.DataBase;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -9,8 +10,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Map;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -34,6 +38,19 @@ public class RequestHandler extends Thread {
             String[] tokens = line.split(" "); // request line split
             while (!line.equals("")) {
                 line = br.readLine();
+
+                if (line.contains("?")) {
+                    log.debug("tokens[1]: {}", tokens[1]);
+                    String[] split = tokens[1].split("\\?");
+                    log.debug("split[1]: {}", split[1]);
+                    Map<String, String> parseQueryString = HttpRequestUtils.parseQueryString(
+                        split[1]);
+
+                    User user = getUser(parseQueryString);
+
+                    DataBase.addUser(user);
+                }
+
                 log.debug("line: {}", line);
             }
             byte[] body = Files.readAllBytes(new File("./webapp" + tokens[1]).toPath());
@@ -44,6 +61,14 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private User getUser(Map<String, String> parseQueryString) {
+        return new User(
+            parseQueryString.get("userId"),
+            parseQueryString.get("password"),
+            parseQueryString.get("name"),
+            parseQueryString.get("email"));
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
