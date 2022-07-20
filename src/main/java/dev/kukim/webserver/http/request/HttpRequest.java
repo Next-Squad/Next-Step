@@ -36,8 +36,8 @@ public class HttpRequest {
 		return requestBody;
 	}
 
-	private RequestLine parseRequestLine(BufferedReader bufferedReader) {
-		throw new UnsupportedOperationException("HttpRequest#parseRequestBody 아직 구현하지 않음 :)");
+	private RequestLine parseRequestLine(BufferedReader bufferedReader) throws IOException {
+		return new RequestLine(bufferedReader.readLine());
 	}
 
 	private RequestHeaders parseRequestHeaders(BufferedReader bufferedReader) {
