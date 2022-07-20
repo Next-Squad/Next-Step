@@ -38,7 +38,7 @@ public class RequestHandler extends Thread {
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             StringBuilder sb = new StringBuilder();
 
-            String line = bufferedReader.readLine();
+            String line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8); // 왜 한 번 더 해줘야 먹힐까? - 위에서 안먹히는 걸까?
             log.info("RequestLine = {}", line);
             if (line == null) {
                 return;
@@ -58,8 +58,8 @@ public class RequestHandler extends Thread {
             }
 
             if (url.equals("/user/create")) {
-                String queryString = URLDecoder.decode(requestUri.getQueryString(), StandardCharsets.UTF_8); // 왜 한 번 더 해줘야 먹힐까? - 위에서 안먹히는 걸까?
-                log.debug("After decode querystring = {}", queryString);
+                String queryString = requestUri.getQueryString();
+                log.debug("Decoded querystring = {}", queryString);
                 Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(queryString);
                 User user = new User(
                         parsedQueryString.get("userId"),
@@ -78,7 +78,7 @@ public class RequestHandler extends Thread {
             responseBody(dos, body);
 
             while (!line.equals((""))) {
-                line = bufferedReader.readLine();
+                line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8);
                 sb.append(line);
                 sb.append("\r\n");
                 log.debug("Header = {}", line);
