@@ -2,6 +2,10 @@ package util;
 
 import static org.assertj.core.api.Assertions.*;
 
+import http.request.HttpMethod;
+import http.request.HttpVersion;
+import http.request.RequestLine;
+import http.request.RequestURI;
 import java.util.Map;
 
 
@@ -11,12 +15,15 @@ import util.HttpRequestUtils.Pair;
 public class HttpRequestUtilsTest {
 
     @Test
-    void RequestLine을_파싱하여_Map에_담을_수_있다() {
-        String requestLine ="GET /index.html HTTP/1.1";
-        Map<String, String> map = HttpRequestUtils.parseRequestLine(requestLine);
-        assertThat(map).containsEntry("method", "GET");
-        assertThat(map).containsEntry("urlPath", "/index.html");
-        assertThat(map).containsEntry("protocol", "HTTP/1.1");
+    void RequestLine을_파싱하여_분류할_수_있다() {
+        String line ="GET /index.html HTTP/1.1";
+        RequestLine requestLine = HttpRequestUtils.parseRequestLine(line);
+        RequestURI requestUri = requestLine.getRequestUri();
+        HttpVersion httpVersion = requestLine.getHttpVersion();
+
+        assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(requestUri.getPath()).isEqualTo("/index.html");
+        assertThat(httpVersion.getVersion()).isEqualTo("HTTP/1.1");
     }
 
     @Test

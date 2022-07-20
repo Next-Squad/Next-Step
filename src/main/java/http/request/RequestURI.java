@@ -14,6 +14,14 @@ public class RequestURI {
 		this.queryString = queryString;
 	}
 
+	public static RequestURI from(String requestUri) {
+		String[] tokens = requestUri.split("\\?");
+		if (tokens.length > 1) {
+			return new RequestURI(tokens[0], tokens[1]);
+		}
+		return new RequestURI(tokens[0]);
+	}
+
 	public String getPath() {
 		return path;
 	}

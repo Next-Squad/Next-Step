@@ -1,5 +1,7 @@
 package handler;
 
+import http.request.RequestLine;
+import http.request.RequestURI;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -41,22 +43,24 @@ public class RequestHandler extends Thread {
             if (line == null) {
                 return;
             }
-            Map<String, String> parsedRequestLine = HttpRequestUtils.parseRequestLine(line);
-            String[] parsedUrlPath = parsedRequestLine.get("urlPath").split("\\?");
-            String url = parsedUrlPath[0];
+            RequestLine requestLine = HttpRequestUtils.parseRequestLine(line);
+            RequestURI requestUri = requestLine.getRequestUri();
+            String url = requestUri.getPath();
 
             byte[] body = null;
             DataOutputStream dos = new DataOutputStream(out);
             if (url.equals("/index.html")) {
                 body = Files.readAllBytes(new File("./webapp" + url).toPath());
-            } else if (url.equals("/user/form.html")) {
+            }
+
+            if (url.equals("/user/form.html")) {
                 body = Files.readAllBytes(new File("./webapp" + url).toPath());
-            } else if (url.equals("/user/create")) {
-                String queryString = parsedUrlPath[1];
-                log.debug("Before encode = {}", queryString);
-                String encode = URLDecoder.decode(queryString, StandardCharsets.UTF_8); // 왜 한 번 더 해줘야 먹힐까? - 위에서 안먹히는 걸까?
-                log.debug("After encode = {}", encode);
-                Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(encode);
+            }
+
+            if (url.equals("/user/create")) {
+                String queryString = URLDecoder.decode(requestUri.getQueryString(), StandardCharsets.UTF_8); // 왜 한 번 더 해줘야 먹힐까? - 위에서 안먹히는 걸까?
+                log.debug("After decode querystring = {}", queryString);
+                Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(queryString);
                 User user = new User(
                         parsedQueryString.get("userId"),
                         parsedQueryString.get("password"),
