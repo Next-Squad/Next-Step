@@ -1,5 +1,7 @@
 package handler;
 
+import http.request.HttpMethod;
+import http.request.RequestHeaders;
 import http.request.RequestLine;
 import http.request.RequestURI;
 import java.io.BufferedReader;
@@ -18,6 +20,8 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.HttpRequestUtils.Pair;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -49,39 +53,63 @@ public class RequestHandler extends Thread {
 
             byte[] body = null;
             DataOutputStream dos = new DataOutputStream(out);
-            if (url.equals("/index.html")) {
-                body = Files.readAllBytes(new File("./webapp" + url).toPath());
-            }
-
-            if (url.equals("/user/form.html")) {
-                body = Files.readAllBytes(new File("./webapp" + url).toPath());
-            }
-
-            if (url.equals("/user/create")) {
-                String queryString = requestUri.getQueryString();
-                log.debug("Decoded querystring = {}", queryString);
-                Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(queryString);
-                User user = new User(
+            if (requestLine.getHttpMethod().equals(HttpMethod.GET)) {
+                if (url.equals("/index.html")) {
+                    body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                }
+                if (url.equals("/user/form.html")) {
+                    body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                }
+                if (url.equals("/user/create")) {
+                    String queryString = requestUri.getQueryString();
+                    log.debug("Decoded querystring = {}", queryString);
+                    Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(queryString);
+                    User user = new User(
                         parsedQueryString.get("userId"),
                         parsedQueryString.get("password"),
                         parsedQueryString.get("name"),
                         parsedQueryString.get("email")
                     );
-                log.debug("Create User ! = {}", user);
+                    log.debug("Create User ! = {}", user);
+                }
             }
 
             if (body == null){
                 body = "Hello World".getBytes();
             }
-
             response200Header(dos, body.length);
             responseBody(dos, body);
 
+            // HTTP Headers
+            RequestHeaders requestHeaders = new RequestHeaders();
             while (!line.equals((""))) {
                 line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8);
+                Pair pair = HttpRequestUtils.parseHeader(line);
+                requestHeaders.addHeader(pair);
                 sb.append(line);
                 sb.append("\r\n");
                 log.debug("Header = {}", line);
+            }
+
+            // HTTP Message Body (Content-Length 만큼 받아야 함)
+            if (requestLine.getHttpMethod().equals(HttpMethod.POST)) {
+                int contentLength = Integer.parseInt(requestHeaders.getHeader("Content-Length"));
+                String messageBody = URLDecoder.decode(
+                    IOUtils.readData(bufferedReader, contentLength),
+                    StandardCharsets.UTF_8
+                );
+                log.debug("HTTP Message Body = {}", messageBody);
+
+                Map<String, String> parsedMessageBody = HttpRequestUtils.parseQueryString(messageBody);
+                if (url.equals("/user/create")) {
+                    User user = new User(
+                        parsedMessageBody.get("userId"),
+                        parsedMessageBody.get("password"),
+                        parsedMessageBody.get("name"),
+                        parsedMessageBody.get("email")
+                    );
+                    log.debug("Create User ! = {}", user);
+                }
             }
 
         } catch (IOException e) {
