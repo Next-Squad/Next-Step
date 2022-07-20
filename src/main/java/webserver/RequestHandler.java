@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +28,10 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             HttpRequestMessage requestMessage = HttpRequestMessage.parse(in);
+            URI uri = requestMessage.uri();
 
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = FileUtils.readFile(this.webAppPath + requestMessage.path());
+            byte[] body = FileUtils.readFile(this.webAppPath + uri.getPath());
             response200Header(dos, body.length);
             responseBody(dos, body);
         } catch (IOException e) {
