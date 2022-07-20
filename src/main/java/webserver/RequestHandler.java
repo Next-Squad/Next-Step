@@ -1,5 +1,6 @@
 package webserver;
 
+import db.DataBase;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -8,9 +9,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
@@ -30,28 +35,44 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(in, StandardCharsets.UTF_8);
+            InputStreamReader inputStreamReader = new InputStreamReader(in, StandardCharsets.UTF_8); // 왜 안먹힐까?
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             StringBuilder sb = new StringBuilder(); // StringBuiffer 를 쓰지않는 이유가 뭘까?
 
             String line = bufferedReader.readLine();
-            log.debug("RequestLine = {}", line);
+            log.info("RequestLine = {}", line);
             if (line == null) {
                 return;
             }
             Map<String, String> parsedRequestLine = HttpRequestUtils.parseRequestLine(line);
             String[] parsedUrlPath = parsedRequestLine.get("urlPath").split("\\?");
-
             String url = parsedUrlPath[0];
-//            String queryParams = parsedUrlPath[1];
 
-            byte[] body;
+            byte[] body = null;
             DataOutputStream dos = new DataOutputStream(out);
             if (url.equals("/index.html")) {
                 body = Files.readAllBytes(new File("./webapp" + url).toPath());
-            } else {
+            } else if (url.equals("/user/form.html")) {
+                body = Files.readAllBytes(new File("./webapp" + url).toPath());
+            } else if (url.equals("/user/create")) {
+                String queryString = parsedUrlPath[1];
+                log.debug("Before encode = {}", queryString);
+                String encode = URLDecoder.decode(queryString, StandardCharsets.UTF_8); // 왜 한 번 더 해줘야 먹힐까? - 위에서 안먹히는 걸까?
+                log.debug("After encode = {}", encode);
+                Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(encode);
+                User user = new User(
+                        parsedQueryString.get("userId"),
+                        parsedQueryString.get("password"),
+                        parsedQueryString.get("name"),
+                        parsedQueryString.get("email")
+                    );
+                log.debug("Create User ! = {}", user);
+            }
+
+            if (body == null){
                 body = "Hello World".getBytes();
             }
+
             response200Header(dos, body.length);
             responseBody(dos, body);
 
