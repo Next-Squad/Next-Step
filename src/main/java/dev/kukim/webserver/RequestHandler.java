@@ -1,5 +1,6 @@
 package dev.kukim.webserver;
 
+import dev.kukim.webserver.http.request.HttpRequest;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -33,16 +34,15 @@ public class RequestHandler extends Thread {
 			OutputStream outputStream = connection.getOutputStream();
 			BufferedReader bufferedReader = new BufferedReader(
 				new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-			DataOutputStream dos = new DataOutputStream(outputStream)) {
+			DataOutputStream dataOutputStream = new DataOutputStream(outputStream)) {
 
-			// http Request의 Request-Line 중 Request-URI 파싱 e.g. /index.html
-			// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1
+			HttpRequest httpRequest = new HttpRequest(inputStream);
+
 			String firstRequestHeaderLine = bufferedReader.readLine();
 			String[] tokens = firstRequestHeaderLine.split(" ");
-
 			byte[] body = Files.readAllBytes(new File("./src/main/resources/webapp" + tokens[1]).toPath());
-			response200Header(dos, body.length);
-			responseBody(dos, body);
+			response200Header(dataOutputStream, body.length);
+			responseBody(dataOutputStream, body);
 		} catch (IOException e) {
 			log.error(e.getMessage());
 		}
