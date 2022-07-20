@@ -1,6 +1,5 @@
-package webserver;
+package handler;
 
-import db.DataBase;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -10,8 +9,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
@@ -37,7 +34,7 @@ public class RequestHandler extends Thread {
 
             InputStreamReader inputStreamReader = new InputStreamReader(in, StandardCharsets.UTF_8); // 왜 안먹힐까?
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuilder sb = new StringBuilder(); // StringBuiffer 를 쓰지않는 이유가 뭘까?
+            StringBuilder sb = new StringBuilder();
 
             String line = bufferedReader.readLine();
             log.info("RequestLine = {}", line);
