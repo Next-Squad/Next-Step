@@ -38,9 +38,7 @@ public class RequestHandler extends Thread {
 
 			HttpRequest httpRequest = new HttpRequest(inputStream);
 
-			String firstRequestHeaderLine = bufferedReader.readLine();
-			String[] tokens = firstRequestHeaderLine.split(" ");
-			byte[] body = Files.readAllBytes(new File("./src/main/resources/webapp" + tokens[1]).toPath());
+			byte[] body = Files.readAllBytes(new File("./src/main/resources/webapp" + httpRequest.getRequestLine().getPath()).toPath());
 			response200Header(dataOutputStream, body.length);
 			responseBody(dataOutputStream, body);
 		} catch (IOException e) {
