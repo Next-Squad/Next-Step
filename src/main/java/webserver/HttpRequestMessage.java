@@ -6,11 +6,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 
-public record HttpRequestMessage(HttpMethod method, String path, HttpHeader header) {
+public record HttpRequestMessage(HttpMethod method, URI uri, HttpHeader header) {
     private static final String SP = " ";
     private static final int METHOD_INDEX = 0;
-    private static final int PATH_INDEX = 1;
+    private static final int URI_INDEX = 1;
 
     public static HttpRequestMessage parse(InputStream in) throws IOException, IllegalArgumentException, IndexOutOfBoundsException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -19,10 +20,10 @@ public record HttpRequestMessage(HttpMethod method, String path, HttpHeader head
         String[] split = requestLine.split(SP);
 
         HttpMethod httpMethod = HttpMethod.valueOf(split[METHOD_INDEX]);
-        String path = split[PATH_INDEX];
+        String path = split[URI_INDEX];
         HttpHeader httpHeader = parseHttpHeader(br);
 
-        return new HttpRequestMessage(httpMethod, path, httpHeader);
+        return new HttpRequestMessage(httpMethod, URI.create(path), httpHeader);
     }
 
     private static HttpHeader parseHttpHeader(BufferedReader br) throws IOException {
