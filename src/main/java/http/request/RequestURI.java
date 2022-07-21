@@ -29,4 +29,8 @@ public class RequestURI {
 	public String getQueryString() {
 		return queryString;
 	}
+
+	public String toString() {
+		return path + queryString;
+	}
 }

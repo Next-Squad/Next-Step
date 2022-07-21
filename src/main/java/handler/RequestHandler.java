@@ -1,27 +1,22 @@
 package handler;
 
 import http.request.HttpMethod;
-import http.request.RequestHeaders;
+import http.request.HttpRequest;
 import http.request.RequestLine;
+import http.request.RequestMessageBody;
 import http.request.RequestURI;
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
-import util.HttpRequestUtils.Pair;
-import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -37,16 +32,9 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-
-            InputStreamReader inputStreamReader = new InputStreamReader(in, StandardCharsets.UTF_8); // 왜 안먹힐까?
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            String line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8); // 왜 한 번 더 해줘야 먹힐까? - 위에서 안먹히는 걸까?
-            log.info("RequestLine = {}", line);
-            if (line == null) {
-                return;
-            }
-            RequestLine requestLine = HttpRequestUtils.parseRequestLine(line);
+            HttpRequest httpRequest = HttpRequest.from(in);
+            RequestLine requestLine = httpRequest.getRequestLine();
+            log.info("RequestLine= {}", requestLine);
             RequestURI requestUri = requestLine.getRequestUri();
             String url = requestUri.getPath();
 
@@ -78,25 +66,10 @@ public class RequestHandler extends Thread {
                 responseBody(dos, body);
             }
 
-
-            // HTTP Headers
-            RequestHeaders requestHeaders = new RequestHeaders();
-            while (!line.equals((""))) {
-                line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8);
-                log.debug("Header = {}", line);
-
-                Pair pair = HttpRequestUtils.parseHeader(line);
-                requestHeaders.addHeader(pair);
-            }
-
-            // HTTP Message Body (Content-Length 만큼 받아야 함)
             if (requestLine.getHttpMethod().equals(HttpMethod.POST)) {
-                int contentLength = Integer.parseInt(requestHeaders.getHeader("Content-Length"));
-                String messageBody = URLDecoder.decode(
-                    IOUtils.readData(bufferedReader, contentLength),
-                    StandardCharsets.UTF_8
-                );
-                log.debug("HTTP Message Body = {}", messageBody);
+                RequestMessageBody requestMessageBody = httpRequest.getRequestMessageBody();
+                String messageBody = requestMessageBody.getMessageBody();
+                log.debug("HTTP Message Body = {}", messageBody );
 
                 Map<String, String> parsedMessageBody = HttpRequestUtils.parseQueryString(messageBody);
                 if (url.equals("/user/create")) {
