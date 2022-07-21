@@ -45,7 +45,7 @@ public class RequestHandler extends Thread {
                 HttpRequestBody body = requestMessage.body();
                 registerNewUser(body);
 
-                responseDynamic(out);
+                responseRedirect(out, URI.create("/index.html"));
             }
 
         } catch (IOException e) {
@@ -81,6 +81,13 @@ public class RequestHandler extends Thread {
         responseBody(dos, body);
     }
 
+    private void responseRedirect(OutputStream out, URI uri) {
+        DataOutputStream dos = new DataOutputStream(out);
+        byte[] body = new byte[]{};
+        response302Header(dos, uri);
+        responseBody(dos, body);
+    }
+
     private boolean isStaticResourceRequest(URI uri) {
         return !uri.getPath().equals(USER_CREATE_URI_PATH);
     }
@@ -90,6 +97,16 @@ public class RequestHandler extends Thread {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302Header(DataOutputStream dos, URI uri) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Location: " + uri.getPath() + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());

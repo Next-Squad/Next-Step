@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Optional;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,7 +63,15 @@ class RequestHandlerTest {
         User savedUser = DataBase.findUserById(expectedUser.getUserId());
 
         // then
-        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.statusCode()).isEqualTo(302);
+
+        HttpHeaders headers = response.headers();
+        assertThat(headers).isNotNull();
+
+        Optional<String> locationHeader = headers.firstValue("Location");
+        assertThat(locationHeader.isPresent()).isTrue();
+        assertThat(locationHeader.orElseThrow()).isEqualTo("/index.html");
+
         assertThat(savedUser).isNotNull();
         assertThat(savedUser).isEqualTo(expectedUser);
     }
