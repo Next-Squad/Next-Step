@@ -1,8 +1,6 @@
 package webserver.Request;
 
 
-import webserver.Request.HttpMethod;
-
 public class RequestLine {
 
     private final HttpMethod httpMethod;

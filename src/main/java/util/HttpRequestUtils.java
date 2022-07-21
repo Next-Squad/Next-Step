@@ -4,18 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
-import webserver.Request.Header;
-import webserver.Request.HttpMethod;
-import webserver.Request.Request;
-import webserver.Request.RequestLine;
+import webserver.Request.*;
 
 public class HttpRequestUtils {
     /**
@@ -33,22 +27,23 @@ public class HttpRequestUtils {
     public static Map<String, String> parseCookies(String cookies) {
         return parseValues(cookies, ";");
     }
-    // TODO
-    public static void toRequest(InputStream inputStream) throws IOException {
+
+
+    public static Request toRequest(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line = bufferedReader.readLine();
         RequestLine requestLine = parseRequestLine(line);
 
-        List<Header> headers = new ArrayList<>();
+        Map<String, String> headers = new HashMap<>();
         while ((line = bufferedReader.readLine()).isEmpty()) {
-            Pair pair = parseHeader(line);
-            headers.add(new Header(pair.key, pair.value));
-
+            Pair header = parseHeader(line);
+            headers.put(header.key, header.value);
         }
 
+        return new Request(requestLine, new Headers(headers));
     }
 
-    public static RequestLine parseRequestLine(String requestLine) {
+    private static RequestLine parseRequestLine(String requestLine) {
         String[] token = requestLine.split(" ");
         if (token.length < 3) {
             throw new IllegalArgumentException();
