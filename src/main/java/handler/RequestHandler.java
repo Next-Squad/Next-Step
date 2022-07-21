@@ -40,7 +40,6 @@ public class RequestHandler extends Thread {
 
             InputStreamReader inputStreamReader = new InputStreamReader(in, StandardCharsets.UTF_8); // 왜 안먹힐까?
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            StringBuilder sb = new StringBuilder();
 
             String line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8); // 왜 한 번 더 해줘야 먹힐까? - 위에서 안먹히는 걸까?
             log.info("RequestLine = {}", line);
@@ -72,23 +71,22 @@ public class RequestHandler extends Thread {
                     );
                     log.debug("Create User ! = {}", user);
                 }
+                if (body == null){
+                    body = "Hello World".getBytes();
+                }
+                response200Header(dos, body.length);
+                responseBody(dos, body);
             }
 
-            if (body == null){
-                body = "Hello World".getBytes();
-            }
-            response200Header(dos, body.length);
-            responseBody(dos, body);
 
             // HTTP Headers
             RequestHeaders requestHeaders = new RequestHeaders();
             while (!line.equals((""))) {
                 line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8);
+                log.debug("Header = {}", line);
+
                 Pair pair = HttpRequestUtils.parseHeader(line);
                 requestHeaders.addHeader(pair);
-                sb.append(line);
-                sb.append("\r\n");
-                log.debug("Header = {}", line);
             }
 
             // HTTP Message Body (Content-Length 만큼 받아야 함)
@@ -110,6 +108,7 @@ public class RequestHandler extends Thread {
                     );
                     log.debug("Create User ! = {}", user);
                 }
+                response302Header(dos, "/index.html");
             }
 
         } catch (IOException e) {
@@ -123,6 +122,18 @@ public class RequestHandler extends Thread {
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302Header(DataOutputStream dos, String redirectURI) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 Found \r\n");
+            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Location: " + redirectURI + "\r\n");
+            dos.writeBytes("\r\n");
+            dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
         }
