@@ -74,11 +74,4 @@ class HttpRequestMessageTest {
             assertThat(body.get("password")).isEqualTo("1234");
         }
     }
-
-    @Test
-    void test() {
-        String str = "userId=jay&password=1234";
-        System.out.println(str.length());
-        System.out.println(str.getBytes().length);
-    }
 }
