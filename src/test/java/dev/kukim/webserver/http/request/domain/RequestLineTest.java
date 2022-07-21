@@ -26,7 +26,7 @@ class RequestLineTest {
 				RequestLine sut = new RequestLine(rawRequestLine);
 
 				assertThat(sut.getMethod()).isEqualTo(HttpMethod.GET);
-				assertThat(sut.getUri()).isEqualTo("/user/create");
+				assertThat(sut.getPath()).isEqualTo("/user/create");
 				assertThat(sut.getQueryParameter("userId")).isEqualTo("kukim");
 				assertThat(sut.getQueryParameter("password")).isEqualTo("1234");
 				assertThat(sut.getQueryParameter("name")).isEqualTo("kunhee");
