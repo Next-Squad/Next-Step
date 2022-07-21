@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HttpRequest {
 
@@ -40,8 +42,16 @@ public class HttpRequest {
 		return new RequestLine(bufferedReader.readLine());
 	}
 
-	private RequestHeaders parseRequestHeaders(BufferedReader bufferedReader) {
-		throw new UnsupportedOperationException("HttpRequest#parseRequestBody 아직 구현하지 않음 :)");
+	private RequestHeaders parseRequestHeaders(BufferedReader bufferedReader) throws IOException {
+		List<String> headers = new ArrayList<>();
+
+		String header = bufferedReader.readLine();
+		while (!"".equals(header)) {
+			headers.add(header);
+			header = bufferedReader.readLine();
+		}
+
+		return new RequestHeaders(headers);
 	}
 
 	private RequestBody parseRequestBody(BufferedReader bufferedReader) {
