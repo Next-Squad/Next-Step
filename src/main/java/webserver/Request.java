@@ -38,7 +38,7 @@ public class Request {
 
 	private void processHttpMethod(String httpMethod, String url, OutputStream out) {
 		if (httpMethod.equals("GET")) {
-			response.makeResonse(url, out);
+			response.makeResponse(url, out);
 		}
 	}
 
