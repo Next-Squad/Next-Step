@@ -2,6 +2,7 @@ package dev.kukim.webserver.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import dev.kukim.webserver.http.request.domain.HttpMethod;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,8 @@ class HttpRequestTest {
 				String httpRequestString = "GET /user/create?userId=kukim&password=1234&name=kunhee HTTP/1.1\n" +
 					"Host: localhost:8080\n" +
 					"User-Agent: curl/7.64.1\n" +
-					"Accept: */*\n";
+					"Accept: */*\n" +
+					"\n";
 
 				try (InputStream inputStream = new ByteArrayInputStream(httpRequestString.getBytes(
 					StandardCharsets.UTF_8))) {
@@ -37,7 +39,7 @@ class HttpRequestTest {
 					HttpRequest sut = new HttpRequest(inputStream);
 
 				// Assert
-					assertThat(sut.getRequestLine().getMethod()).isEqualTo("GET");
+					assertThat(sut.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET);
 					assertThat(sut.getRequestLine().getQueryParameter("userId")).isEqualTo("kukim");
 					assertThat(sut.getRequestHeaders().getHost()).isEqualTo("localhost:8080");
 				}

@@ -55,7 +55,6 @@ public class HttpRequest {
 	}
 
 	private RequestBody parseRequestBody(BufferedReader bufferedReader) {
-		throw new UnsupportedOperationException("HttpRequest#parseRequestBody 아직 구현하지 않음 :)");
-
+		return new RequestBody();
 	}
 }
