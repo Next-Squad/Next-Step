@@ -14,7 +14,10 @@ import java.net.ServerSocket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublisher;
+import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,17 +44,20 @@ class RequestHandlerTest {
     void createUserTest() throws IOException, InterruptedException {
         // given
         User expectedUser = new User("jay", "1234", "김진완", "jay@mail.com");
-        String uri = getUserCreateUri(expectedUser);
+        BodyPublisher userCreateRequestBody =
+                BodyPublishers.ofString(getUserCreateParameters(expectedUser));
+
+        String uri = getUserCreateUri();
 
         HttpRequest request = HttpRequest.newBuilder()
-                .GET()
+                .POST(userCreateRequestBody)
                 .uri(URI.create(uri))
                 .build();
 
         HttpClient httpClient = HttpClient.newHttpClient();
 
         // when
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response = httpClient.send(request, BodyHandlers.ofString());
         User savedUser = DataBase.findUserById(expectedUser.getUserId());
 
         // then
@@ -60,12 +66,15 @@ class RequestHandlerTest {
         assertThat(savedUser).isEqualTo(expectedUser);
     }
 
-    private String getUserCreateUri(User expectedUser) {
-        return baseUrl + USER_CREATE_URI_PATH + "?" +
-                "userId=" + expectedUser.getUserId() +
-                "&password=" + expectedUser.getPassword() +
-                "&name=" + expectedUser.getName() +
-                "&email=" + expectedUser.getEmail();
+    private String getUserCreateUri() {
+        return baseUrl + USER_CREATE_URI_PATH;
+    }
+
+    private String getUserCreateParameters(User user) {
+        return "userId=" + user.getUserId() +
+                "&password=" + user.getPassword() +
+                "&name=" + user.getName() +
+                "&email=" + user.getEmail();
     }
 
     private int randomPortNumber() {
