@@ -1,16 +1,25 @@
 package util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import webserver.Request.Header;
+import webserver.Request.HttpMethod;
+import webserver.Request.Request;
+import webserver.Request.RequestLine;
 
 public class HttpRequestUtils {
     /**
-     * @param queryString은
-     *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
+     * @param queryString은 URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
      * @return
      */
     public static Map<String, String> parseQueryString(String queryString) {
@@ -18,12 +27,33 @@ public class HttpRequestUtils {
     }
 
     /**
-     * @param 쿠키
-     *            값은 name1=value1; name2=value2 형식임
+     * @param 쿠키 값은 name1=value1; name2=value2 형식임
      * @return
      */
     public static Map<String, String> parseCookies(String cookies) {
         return parseValues(cookies, ";");
+    }
+    // TODO
+    public static void toRequest(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line = bufferedReader.readLine();
+        RequestLine requestLine = parseRequestLine(line);
+
+        List<Header> headers = new ArrayList<>();
+        while ((line = bufferedReader.readLine()).isEmpty()) {
+            Pair pair = parseHeader(line);
+            headers.add(new Header(pair.key, pair.value));
+
+        }
+
+    }
+
+    public static RequestLine parseRequestLine(String requestLine) {
+        String[] token = requestLine.split(" ");
+        if (token.length < 3) {
+            throw new IllegalArgumentException();
+        }
+        return new RequestLine(HttpMethod.from(token[0]), token[1], token[2]);
     }
 
     private static Map<String, String> parseValues(String values, String separator) {
