@@ -19,15 +19,8 @@ public class RequestHeaders {
 			));
 	}
 
-	public String getHost() {
-		return headers.get("Host");
-	}
 
-	public String getUserAgent() {
-		return headers.get("User-Agent");
-	}
-
-	public String getAccept() {
-		return headers.get("Accept");
+	public String get(String key) {
+		return headers.get(key);
 	}
 }

@@ -39,9 +39,9 @@ class HttpRequestTest {
 					HttpRequest sut = new HttpRequest(inputStream);
 
 				// Assert
-					assertThat(sut.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET);
-					assertThat(sut.getRequestLine().getQueryParameter("userId")).isEqualTo("kukim");
-					assertThat(sut.getRequestHeaders().getHost()).isEqualTo("localhost:8080");
+					assertThat(sut.getMethod()).isEqualTo(HttpMethod.GET);
+					assertThat(sut.getQueryParameter("userId")).isEqualTo("kukim");
+					assertThat(sut.getRequestHeader("Host")).isEqualTo("localhost:8080");
 				}
 	        }
 	    }

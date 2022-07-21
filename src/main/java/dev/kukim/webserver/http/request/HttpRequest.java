@@ -1,5 +1,6 @@
 package dev.kukim.webserver.http.request;
 
+import dev.kukim.webserver.http.request.domain.HttpMethod;
 import dev.kukim.webserver.http.request.domain.RequestHeaders;
 import dev.kukim.webserver.http.request.domain.RequestLine;
 import dev.kukim.webserver.http.request.domain.RequestBody;
@@ -26,18 +27,6 @@ public class HttpRequest {
 		requestBody = parseRequestBody(bufferedReader);
 	}
 
-	public RequestLine getRequestLine() {
-		return requestLine;
-	}
-
-	public RequestHeaders getRequestHeaders() {
-		return requestHeaders;
-	}
-
-	public RequestBody getRequestBody() {
-		return requestBody;
-	}
-
 	private RequestLine parseRequestLine(BufferedReader bufferedReader) throws IOException {
 		return new RequestLine(bufferedReader.readLine());
 	}
@@ -56,5 +45,21 @@ public class HttpRequest {
 
 	private RequestBody parseRequestBody(BufferedReader bufferedReader) {
 		return new RequestBody();
+	}
+
+	public String getPath() {
+		return requestLine.getPath();
+	}
+
+	public HttpMethod getMethod() {
+		return requestLine.getMethod();
+	}
+
+	public String getQueryParameter(String key) {
+		return requestLine.getQueryParameter(key);
+	}
+
+	public String getRequestHeader(String key) {
+		return requestHeaders.get(key);
 	}
 }

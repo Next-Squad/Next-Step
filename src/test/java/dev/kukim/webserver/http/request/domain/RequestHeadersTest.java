@@ -29,9 +29,9 @@ class RequestHeadersTest {
 
 				RequestHeaders sut = new RequestHeaders(rawHeaders);
 
-				assertThat(sut.getHost()).isEqualTo("localhost:8080");
-				assertThat(sut.getUserAgent()).isEqualTo("curl/7.64.1");
-				assertThat(sut.getAccept()).isEqualTo("*/*");
+				assertThat(sut.get("Host")).isEqualTo("localhost:8080");
+				assertThat(sut.get("User-Agent")).isEqualTo("curl/7.64.1");
+				assertThat(sut.get("Accept")).isEqualTo("*/*");
 			}
 	    }
 	}
