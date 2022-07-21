@@ -1,8 +1,8 @@
 package dev.kukim.webserver.http.request;
 
-import dev.kukim.webserver.http.request.domain.RequestBody;
 import dev.kukim.webserver.http.request.domain.RequestHeaders;
 import dev.kukim.webserver.http.request.domain.RequestLine;
+import dev.kukim.webserver.http.request.domain.RequestBody;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
