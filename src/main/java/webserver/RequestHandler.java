@@ -9,12 +9,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -37,20 +39,33 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(inReader);
 
             String line = br.readLine(); // request line 따로 입력 받음
+            log.debug("request line: {}", line);
             String[] tokens = line.split(" "); // request line split
+            int contentLength = 0;
+
+            while (!line.equals("")) {
+                log.debug("header: {}", line);
+                line = br.readLine();
+                if (line.contains("Content-Length")) {
+                    String[] headerTokens = line.split(":");
+                    contentLength = Integer.parseInt(headerTokens[1].trim());
+                }
+            }
+            log.debug("int 형식의 contentLength: {}", contentLength);
 
             String url = tokens[1];
-            if (url.startsWith(CREATE_USER_PATH)) {
-                int index = url.indexOf(QUERY_SIGN);
-                String queryString = url.substring(index + 1);
-                Map<String, String> params = HttpRequestUtils.parseQueryString(
-                    queryString);
+            if (CREATE_USER_PATH.equals(url)) {
+                String body = IOUtils.readData(br, contentLength);
+                String decode = URLDecoder.decode(body);
+                log.debug("String으로 변환된 contentLength: {}", decode);
+                Map<String, String> params = HttpRequestUtils.parseQueryString(decode);
 
                 User user = new User(
                     params.get("userId"),
                     params.get("password"),
                     params.get("name"),
                     params.get("email"));
+                log.debug("user: {}", user);
                 DataBase.addUser(user);
             }
 
