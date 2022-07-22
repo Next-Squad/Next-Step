@@ -30,7 +30,11 @@ public class RequestURI {
 		return queryString;
 	}
 
+	@Override
 	public String toString() {
-		return path + queryString;
+		if (queryString != null) {
+			return path + queryString;
+		}
+		return path;
 	}
 }

@@ -16,12 +16,12 @@ public class HttpRequest {
 	private final RequestHeaders requestHeaders;
 	private RequestMessageBody requestMessageBody;
 
-	public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders) {
+	private HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders) {
 		this.requestLine = requestLine;
 		this.requestHeaders = requestHeaders;
 	}
 
-	public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestMessageBody requestMessageBody) {
+	private HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestMessageBody requestMessageBody) {
 		this(requestLine, requestHeaders);
 		this.requestMessageBody = requestMessageBody;
 	}

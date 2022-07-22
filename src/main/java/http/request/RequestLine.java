@@ -1,5 +1,7 @@
 package http.request;
 
+import http.HttpVersion;
+
 public class RequestLine {
 
 	private final HttpMethod httpMethod;
@@ -31,6 +33,7 @@ public class RequestLine {
 		return httpVersion;
 	}
 
+	@Override
 	public String toString() {
 		return httpMethod.toString() + " "
 			+ requestUri.toString() + " "

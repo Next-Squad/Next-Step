@@ -1,10 +1,12 @@
 package handler;
 
+import controller.FrontController;
 import http.request.HttpMethod;
 import http.request.HttpRequest;
 import http.request.RequestLine;
 import http.request.RequestMessageBody;
 import http.request.RequestURI;
+import http.response.HttpResponse;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -33,37 +35,19 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             HttpRequest httpRequest = HttpRequest.from(in);
+            HttpResponse httpResponse = HttpResponse.ok();
             RequestLine requestLine = httpRequest.getRequestLine();
             log.info("RequestLine= {}", requestLine);
             RequestURI requestUri = requestLine.getRequestUri();
             String url = requestUri.getPath();
 
-            byte[] body = null;
-            DataOutputStream dos = new DataOutputStream(out);
             if (requestLine.getHttpMethod().equals(HttpMethod.GET)) {
                 if (url.equals("/index.html")) {
-                    body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                    httpResponse = HttpResponse.ok("/index.html");
                 }
                 if (url.equals("/user/form.html")) {
-                    body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                    httpResponse = HttpResponse.ok("/user/form.html");
                 }
-                if (url.equals("/user/create")) {
-                    String queryString = requestUri.getQueryString();
-                    log.debug("Decoded querystring = {}", queryString);
-                    Map<String, String> parsedQueryString = HttpRequestUtils.parseQueryString(queryString);
-                    User user = new User(
-                        parsedQueryString.get("userId"),
-                        parsedQueryString.get("password"),
-                        parsedQueryString.get("name"),
-                        parsedQueryString.get("email")
-                    );
-                    log.debug("Create User ! = {}", user);
-                }
-                if (body == null){
-                    body = "Hello World".getBytes();
-                }
-                response200Header(dos, body.length);
-                responseBody(dos, body);
             }
 
             if (requestLine.getHttpMethod().equals(HttpMethod.POST)) {
@@ -81,41 +65,10 @@ public class RequestHandler extends Thread {
                     );
                     log.debug("Create User ! = {}", user);
                 }
-                response302Header(dos, "/index.html");
+                httpResponse = HttpResponse.found("/index.html");
             }
+            httpResponse.flush(out);
 
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response302Header(DataOutputStream dos, String redirectURI) {
-        try {
-            dos.writeBytes("HTTP/1.1 302 Found \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Location: " + redirectURI + "\r\n");
-            dos.writeBytes("\r\n");
-            dos.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void responseBody(DataOutputStream dos, byte[] body) {
-        try {
-            dos.write(body, 0, body.length);
-            dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
         }

@@ -3,7 +3,7 @@ package util;
 import static org.assertj.core.api.Assertions.*;
 
 import http.request.HttpMethod;
-import http.request.HttpVersion;
+import http.HttpVersion;
 import http.request.RequestLine;
 import http.request.RequestURI;
 import java.util.Map;
