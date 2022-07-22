@@ -4,10 +4,10 @@ package webserver.Request;
 public class RequestLine {
 
     private final HttpMethod httpMethod;
-    private final String uri;
+    private final Uri uri;
     private final String protocol;
 
-    public RequestLine(HttpMethod httpMethod, String uri, String protocol) {
+    public RequestLine(HttpMethod httpMethod, Uri uri, String protocol) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.protocol = protocol;
@@ -17,7 +17,7 @@ public class RequestLine {
         return httpMethod;
     }
 
-    public String getUri() {
+    public Uri getUri() {
         return uri;
     }
 

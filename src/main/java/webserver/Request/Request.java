@@ -1,5 +1,7 @@
 package webserver.Request;
 
+import webserver.Headers;
+
 public class Request {
 
     private final RequestLine requestLine;
@@ -17,4 +19,22 @@ public class Request {
     public Headers getHeaders() {
         return headers;
     }
+
+    public HttpMethod getHttpMethod() {
+        return requestLine.getHttpMethod();
+    }
+
+    public String getUriPath() {
+        return requestLine.getUri().getPath();
+    }
+
+    public String getProtocol() {
+        return requestLine.getProtocol();
+    }
+
+    public boolean isResourceRequest() {
+        return requestLine.getUri().isResourcePath();
+    }
+
+
 }

@@ -6,18 +6,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import dispatcher.Dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
 import webserver.Request.Request;
+import webserver.Response.Response;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-    private Socket connection;
+    private final Socket connection;
+    private final Dispatcher dispatcher;
 
-    public RequestHandler(Socket connectionSocket) {
+    public RequestHandler(Socket connectionSocket, Dispatcher dispatcher) {
         this.connection = connectionSocket;
+        this.dispatcher = dispatcher;
     }
 
     public void run() {
@@ -28,12 +32,9 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
 
             Request request = readRequest(in);
+            Response response = Response.of(request.getRequestLine().getProtocol());
+            dispatcher.dispatch(request, response);
 
-
-            DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
-            response200Header(dos, body.length);
-            responseBody(dos, body);
         } catch (IOException e) {
             log.error(e.getMessage());
         }

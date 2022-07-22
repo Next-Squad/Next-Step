@@ -9,11 +9,12 @@ import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import webserver.Headers;
 import webserver.Request.*;
 
 public class HttpRequestUtils {
     /**
-     * @param queryString은 URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
+     * @param queryString URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
      * @return
      */
     public static Map<String, String> parseQueryString(String queryString) {
@@ -44,11 +45,19 @@ public class HttpRequestUtils {
     }
 
     private static RequestLine parseRequestLine(String requestLine) {
-        String[] token = requestLine.split(" ");
-        if (token.length < 3) {
+        String[] tokens = requestLine.split(" ");
+        if (tokens.length < 3) {
             throw new IllegalArgumentException();
         }
-        return new RequestLine(HttpMethod.from(token[0]), token[1], token[2]);
+        return new RequestLine(HttpMethod.from(tokens[0]), parseUri(tokens[1]), tokens[2]);
+    }
+
+    private static Uri parseUri(String uri) {
+        if (uri.contains("?")) {
+            String[] tokens = uri.split("\\?");
+            return Uri.of(tokens[0], tokens[1]);
+        }
+        return Uri.simplePath(uri);
     }
 
     private static Map<String, String> parseValues(String values, String separator) {
