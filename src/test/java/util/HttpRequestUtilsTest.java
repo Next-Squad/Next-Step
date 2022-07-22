@@ -57,23 +57,33 @@ public class HttpRequestUtilsTest {
 
     @Test
     @DisplayName("유효한 keyValue 문자열이 입력되면, 파싱에 성공한다.")
-    public void getKeyValue() throws Exception {
+    public void getKeyValue() {
         Pair pair = HttpRequestUtils.getKeyValue("userId=javajigi", "=");
         assertThat(pair).isEqualTo(new Pair("userId", "javajigi"));
     }
 
     @Test
     @DisplayName("유효하지 않은 keyValue 문자열이 입력되면, 파싱에 실패한다.")
-    public void getKeyValue_invalid() throws Exception {
+    public void getKeyValue_invalid() {
         Pair pair = HttpRequestUtils.getKeyValue("userId", "=");
         assertThat(pair).isNull();
     }
 
     @Test
     @DisplayName("유효한 header 문자열이 입력되면, 파싱에 성공한다.")
-    public void parseHeader() throws Exception {
+    public void parseHeader() {
         String header = "Content-Length: 59";
         Pair pair = HttpRequestUtils.parseHeader(header);
         assertThat(pair).isEqualTo(new Pair("Content-Length", "59"));
+    }
+
+    @Test
+    @DisplayName("확장자가 포함된 url 문자열이 입력되면, 파싱에 성공한다.")
+    public void parseExtension() {
+        String expectedExtension = "html";
+        String url = "/index.html";
+        String extension = HttpRequestUtils.parseExtension(url);
+
+        assertThat(extension).isEqualTo(expectedExtension);
     }
 }
