@@ -9,17 +9,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private static final String CREATE_USER_PATH = "/user/create";
+    private static final String QUERY_SIGN = "?";
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -35,26 +39,38 @@ public class RequestHandler extends Thread {
             BufferedReader br = new BufferedReader(inReader);
 
             String line = br.readLine(); // request line 따로 입력 받음
+            log.debug("request line: {}", line);
             String[] tokens = line.split(" "); // request line split
+            int contentLength = 0;
+
             while (!line.equals("")) {
+                log.debug("header: {}", line);
                 line = br.readLine();
-
-                if (line.contains("?")) {
-                    log.debug("tokens[1]: {}", tokens[1]);
-                    String[] split = tokens[1].split("\\?");
-                    log.debug("split[1]: {}", split[1]);
-                    Map<String, String> parseQueryString = HttpRequestUtils.parseQueryString(
-                        split[1]);
-
-                    User user = getUser(parseQueryString);
-
-                    DataBase.addUser(user);
+                if (line.contains("Content-Length")) {
+                    String[] headerTokens = line.split(":");
+                    contentLength = Integer.parseInt(headerTokens[1].trim());
                 }
-
-                log.debug("line: {}", line);
             }
-            byte[] body = Files.readAllBytes(new File("./webapp" + tokens[1]).toPath());
+            log.debug("int 형식의 contentLength: {}", contentLength);
 
+            String url = tokens[1];
+            if (CREATE_USER_PATH.equals(url)) {
+                String body = IOUtils.readData(br, contentLength);
+                String decode = URLDecoder.decode(body);
+                log.debug("String으로 변환된 contentLength: {}", decode);
+                Map<String, String> params = HttpRequestUtils.parseQueryString(decode);
+
+                User user = new User(
+                    params.get("userId"),
+                    params.get("password"),
+                    params.get("name"),
+                    params.get("email"));
+                log.debug("user: {}", user);
+                DataBase.addUser(user);
+            }
+
+            log.debug("line: {}", line);
+            byte[] body = Files.readAllBytes(new File("./webapp" + tokens[1]).toPath());
             DataOutputStream dos = new DataOutputStream(out);
             response200Header(dos, body.length);
             responseBody(dos, body);
@@ -63,13 +79,7 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private User getUser(Map<String, String> parseQueryString) {
-        return new User(
-            parseQueryString.get("userId"),
-            parseQueryString.get("password"),
-            parseQueryString.get("name"),
-            parseQueryString.get("email"));
-    }
+
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
