@@ -42,4 +42,9 @@ public class HttpResponse {
 	private void writeBody() throws IOException {
 		dos.write(body, 0, body.length);
 	}
+
+	public void setCookie(String cookie) {
+		headers.add("Set-Cookie", cookie);
+
+	}
 }

@@ -18,9 +18,6 @@ public class UserCreateController implements Controller{
 		return instance;
 	}
 
-	public UserCreateController() {
-	}
-
 	@Override
 	public void process(HttpRequest request, HttpResponse response) throws IOException {
 		if (request.getMethod().equals(HttpMethod.GET)) {
