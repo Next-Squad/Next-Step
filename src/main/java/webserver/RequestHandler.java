@@ -20,6 +20,8 @@ public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private static final String CREATE_USER_PATH = "/user/create";
+    private static final String QUERY_SIGN = "?";
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -36,25 +38,24 @@ public class RequestHandler extends Thread {
 
             String line = br.readLine(); // request line 따로 입력 받음
             String[] tokens = line.split(" "); // request line split
-            while (!line.equals("")) {
-                line = br.readLine();
 
-                if (line.contains("?")) {
-                    log.debug("tokens[1]: {}", tokens[1]);
-                    String[] split = tokens[1].split("\\?");
-                    log.debug("split[1]: {}", split[1]);
-                    Map<String, String> parseQueryString = HttpRequestUtils.parseQueryString(
-                        split[1]);
+            String url = tokens[1];
+            if (url.startsWith(CREATE_USER_PATH)) {
+                int index = url.indexOf(QUERY_SIGN);
+                String queryString = url.substring(index + 1);
+                Map<String, String> params = HttpRequestUtils.parseQueryString(
+                    queryString);
 
-                    User user = getUser(parseQueryString);
-
-                    DataBase.addUser(user);
-                }
-
-                log.debug("line: {}", line);
+                User user = new User(
+                    params.get("userId"),
+                    params.get("password"),
+                    params.get("name"),
+                    params.get("email"));
+                DataBase.addUser(user);
             }
-            byte[] body = Files.readAllBytes(new File("./webapp" + tokens[1]).toPath());
 
+            log.debug("line: {}", line);
+            byte[] body = Files.readAllBytes(new File("./webapp" + tokens[1]).toPath());
             DataOutputStream dos = new DataOutputStream(out);
             response200Header(dos, body.length);
             responseBody(dos, body);
@@ -63,13 +64,7 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private User getUser(Map<String, String> parseQueryString) {
-        return new User(
-            parseQueryString.get("userId"),
-            parseQueryString.get("password"),
-            parseQueryString.get("name"),
-            parseQueryString.get("email"));
-    }
+
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
