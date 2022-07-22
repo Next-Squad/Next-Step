@@ -22,4 +22,11 @@ public class HttpRequestBody {
     public String get(String key) {
         return this.body.get(key);
     }
+
+    public HttpRequestBody clone() {
+        HttpRequestBody requestBodyClone = new HttpRequestBody();
+        requestBodyClone.body.putAll(this.body);
+
+        return requestBodyClone;
+    }
 }
