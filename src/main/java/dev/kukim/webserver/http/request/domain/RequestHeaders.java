@@ -19,8 +19,20 @@ public class RequestHeaders {
 			));
 	}
 
-
 	public String get(String key) {
 		return headers.get(key);
+	}
+
+	public boolean hasContentLength() {
+		return headers.containsKey("Content-Length");
+	}
+
+	public int getContentLength() {
+		return Integer.parseInt(get("Content-Length"));
+
+	}
+
+	public String getContentType() {
+		return get("Content-Type");
 	}
 }

@@ -1,5 +1,6 @@
 package dev.kukim.webserver.http.request;
 
+import dev.kukim.util.IOUtils;
 import dev.kukim.webserver.http.request.domain.HttpMethod;
 import dev.kukim.webserver.http.request.domain.RequestHeaders;
 import dev.kukim.webserver.http.request.domain.RequestLine;
@@ -43,8 +44,12 @@ public class HttpRequest {
 		return new RequestHeaders(headers);
 	}
 
-	private RequestBody parseRequestBody(BufferedReader bufferedReader) {
-		return new RequestBody();
+	private RequestBody parseRequestBody(BufferedReader bufferedReader) throws IOException {
+		if (requestHeaders.hasContentLength()) {
+			String rawRequestBody = IOUtils.readData(bufferedReader, requestHeaders.getContentLength());
+			return new RequestBody(requestHeaders.getContentType(), rawRequestBody);
+		}
+		return null;
 	}
 
 	public String getPath() {
@@ -61,5 +66,9 @@ public class HttpRequest {
 
 	public String getRequestHeader(String key) {
 		return requestHeaders.get(key);
+	}
+
+	public String getBodyQueryParameter(String key) {
+		return requestBody.get(key);
 	}
 }
