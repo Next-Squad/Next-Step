@@ -29,4 +29,12 @@ public class RequestURI {
 	public String getQueryString() {
 		return queryString;
 	}
+
+	@Override
+	public String toString() {
+		if (queryString != null) {
+			return path + queryString;
+		}
+		return path;
+	}
 }

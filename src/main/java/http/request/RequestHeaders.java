@@ -18,4 +18,8 @@ public class RequestHeaders {
 	public String getHeader(String key) {
 		return headers.get(key);
 	}
+
+	public boolean containsKey(String key) {
+		return headers.containsKey(key);
+	}
 }
