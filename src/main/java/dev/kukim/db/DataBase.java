@@ -6,6 +6,7 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import dev.kukim.model.User;
+import java.util.Optional;
 
 public class DataBase {
     private static Map<String, User> users = Maps.newHashMap();
@@ -14,8 +15,8 @@ public class DataBase {
         users.put(user.getUserId(), user);
     }
 
-    public static User findUserById(String userId) {
-        return users.get(userId);
+    public static Optional<User> findUserById(String userId) {
+        return Optional.ofNullable(users.get(userId));
     }
 
     public static Collection<User> findAll() {

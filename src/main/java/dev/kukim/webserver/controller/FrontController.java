@@ -3,6 +3,7 @@ package dev.kukim.webserver.controller;
 import dev.kukim.controller.Controller;
 import dev.kukim.controller.ResourceController;
 import dev.kukim.controller.UserCreateController;
+import dev.kukim.controller.UserLoginController;
 import dev.kukim.webserver.http.request.HttpRequest;
 import dev.kukim.webserver.http.response.HttpResponse;
 import java.io.IOException;
@@ -22,6 +23,7 @@ public class FrontController {
 
 	private FrontController() {
 		controllerMap.put("/user/create", UserCreateController.getInstance());
+		controllerMap.put("/user/login", UserLoginController.getInstance());
 	}
 
 	public void service(HttpRequest request, HttpResponse response) throws IOException {
