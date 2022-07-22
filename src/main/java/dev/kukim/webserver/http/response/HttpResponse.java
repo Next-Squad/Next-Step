@@ -22,7 +22,6 @@ public class HttpResponse {
 
 	public void sendOK() throws IOException {
 		dos.writeBytes("HTTP/1.1 200 OK \r\n");
-		dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
 		writeHeaders();
 		writeBody();
 		dos.flush();
@@ -45,6 +44,9 @@ public class HttpResponse {
 
 	public void setCookie(String cookie) {
 		headers.add("Set-Cookie", cookie);
+	}
 
+	public void setContentType(String contentType) {
+		headers.add("Content-Type", contentType);
 	}
 }

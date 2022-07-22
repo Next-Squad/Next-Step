@@ -53,12 +53,13 @@ class HttpResponseTest {
 				String rawBody = "<html><body><h1>Test</h1></body></html>";
 
 				response.setBody(rawBody.getBytes(StandardCharsets.UTF_8));
+				response.setContentType("text/html;charset=utf-8");
 				response.sendOK();
 
 				assertThat(byteArrayOutputStream.toString())
 					.hasToString("HTTP/1.1 200 OK \r\n"
-						+ "Content-Type: text/html;charset=utf-8\r\n"
-						+ "Content-Length: 39\r\n\r\n"
+						+ "Content-Length: 39\r\n"
+						+ "Content-Type: text/html;charset=utf-8\r\n\r\n"
 						+ "<html><body><h1>Test</h1></body></html>");
 			}
 		}
