@@ -8,9 +8,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Map.Entry;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.HttpRequestUtils;
 
 public class Request {
 
@@ -50,26 +53,24 @@ public class Request {
 
 	private void processQueryParameter(String url, int indexOfQueryParameter) {
 		String requestPath = url.substring(0, indexOfQueryParameter);
-		String params = url.substring(indexOfQueryParameter + 1);
+		String queryString = url.substring(indexOfQueryParameter + 1);
 
-		String[] split = params.split("&");
-		// Todo: 2. java reflection 을 이용해볼 수 있지 않을까?
-		// Todo: 1. stream 으로 parsing 하고 객체 생성 가능할 것 같은데
+		Map<String, String> queryStringMap = HttpRequestUtils.parseQueryString(queryString);
+
 		User user = new User();
-		for (String param : split) {
-			String[] queryParam = param.split("=");
-			switch (queryParam[0]) {
+		for (Entry<String, String> entry : queryStringMap.entrySet()) {
+			switch (entry.getKey()) {
 				case "userId":
-					user.setUserId(queryParam[1]);
+					user.setUserId(entry.getValue());
 					break;
 				case "name":
-					user.setName(queryParam[1]);
+					user.setName(entry.getValue());
 					break;
 				case "password":
-					user.setPassword(queryParam[1]);
+					user.setPassword(entry.getValue());
 					break;
 				case "email":
-					user.setEmail(URLDecoder.decode(queryParam[1], StandardCharsets.UTF_8));
+					user.setEmail(URLDecoder.decode(entry.getValue(), StandardCharsets.UTF_8));
 					break;
 			}
 		}
