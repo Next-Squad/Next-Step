@@ -1,23 +1,40 @@
 package dev.kukim.webserver.controller;
 
+import dev.kukim.controller.Controller;
+import dev.kukim.controller.ResourceController;
+import dev.kukim.controller.UserCreateController;
 import dev.kukim.webserver.http.request.HttpRequest;
 import dev.kukim.webserver.http.response.HttpResponse;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FrontController {
 
+	private static final ResourceController resourceController = new ResourceController();
 	private static final FrontController instance = new FrontController();
 
 	public static FrontController getInstance() {
 		return instance;
 	}
 
-	public void process(HttpRequest request, HttpResponse response) throws IOException {
-		response.setBody(Files.readAllBytes(new File(
-			"./src/main/resources/webapp" + request.getRequestLine().getPath()).toPath()));
+	private final Map<String, Controller> controllerMap = new ConcurrentHashMap<>();
 
-		response.sendOK();
+	private FrontController() {
+		controllerMap.put("/user/create", UserCreateController.getInstance());
 	}
+
+	public void service(HttpRequest request, HttpResponse response) throws IOException {
+		Controller controller = getController(request);
+		controller.process(request, response);
+	}
+
+	private Controller getController(HttpRequest request) {
+		Controller controller = controllerMap.get(request.getPath());
+		if (controller != null) {
+			return controller;
+		}
+		return resourceController;
+	}
+
 }

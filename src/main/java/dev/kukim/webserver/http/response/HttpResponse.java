@@ -28,6 +28,13 @@ public class HttpResponse {
 		dos.flush();
 	}
 
+	public void sendRedirect(String location) throws IOException {
+		dos.writeBytes("HTTP/1.1 302 Found \r\n");
+		dos.writeBytes("Location: " + location + "\r\n");
+		writeHeaders();
+		dos.flush();
+	}
+
 	private void writeHeaders() throws IOException {
 		dos.writeBytes(headers.toString());
 	}
