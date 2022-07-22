@@ -45,6 +45,38 @@ class HttpRequestTest {
 				}
 	        }
 	    }
+
+		@Nested
+		@DisplayName("만약 Http POST Reuqest Body가 쿼리파라미터가 inputStream 주어진다면")
+		class Context_with_post_requst_inputStream {
+
+			@Test
+			@DisplayName("HttpRequest 객체를 반환한다")
+			void It_returns_a_HttpRequest() throws IOException {
+				// Arrange
+				String httpRequestString = "POST /user/create HTTP/1.1\r\n" +
+					"Host: localhost:8080\r\n" +
+					"User-Agent: curl/7.64.1\r\n" +
+					"Content-Length: 59\r\n" +
+					"Content-Type: application/x-www-form-urlencoded\r\n" +
+					"Accept: */*\r\n" +
+					"\r\n" +
+					"userId=kukim&password=1234&name=kunhee";
+
+				try (InputStream inputStream = new ByteArrayInputStream(httpRequestString.getBytes(
+					StandardCharsets.UTF_8))) {
+
+					// Act
+					HttpRequest sut = new HttpRequest(inputStream);
+
+					// Assert
+					assertThat(sut.getMethod()).isEqualTo(HttpMethod.POST);
+					assertThat(sut.getBodyQueryParameter("userId")).isEqualTo("kukim");
+					assertThat(sut.getBodyQueryParameter("password")).isEqualTo("1234");
+					assertThat(sut.getBodyQueryParameter("name")).isEqualTo("kunhee");
+				}
+			}
+		}
 	}
 
 }
