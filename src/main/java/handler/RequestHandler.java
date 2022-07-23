@@ -1,19 +1,17 @@
 package handler;
 
-import controller.FrontController;
+import db.URLDataBase;
+import db.UserDataBase;
 import http.request.HttpMethod;
 import http.request.HttpRequest;
 import http.request.RequestLine;
 import http.request.RequestMessageBody;
 import http.request.RequestURI;
 import http.response.HttpResponse;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
@@ -23,7 +21,7 @@ import util.HttpRequestUtils;
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-    private Socket connection;
+    private final Socket connection;
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -41,13 +39,8 @@ public class RequestHandler extends Thread {
             RequestURI requestUri = requestLine.getRequestUri();
             String url = requestUri.getPath();
 
-            if (requestLine.getHttpMethod().equals(HttpMethod.GET)) {
-                if (url.equals("/index.html")) {
-                    httpResponse = HttpResponse.ok("/index.html");
-                }
-                if (url.equals("/user/form.html")) {
-                    httpResponse = HttpResponse.ok("/user/form.html");
-                }
+            if (requestLine.getHttpMethod().equals(HttpMethod.GET) && URLDataBase.contains(url)) {
+                httpResponse = HttpResponse.ok(url);
             }
 
             if (requestLine.getHttpMethod().equals(HttpMethod.POST)) {
@@ -56,15 +49,33 @@ public class RequestHandler extends Thread {
                 log.debug("HTTP Message Body = {}", messageBody );
 
                 Map<String, String> parsedMessageBody = HttpRequestUtils.parseQueryString(messageBody);
+                String userId = parsedMessageBody.get("userId");
+                String password = parsedMessageBody.get("password");
                 if (url.equals("/user/create")) {
                     User user = new User(
-                        parsedMessageBody.get("userId"),
-                        parsedMessageBody.get("password"),
+                        userId, password,
                         parsedMessageBody.get("name"),
                         parsedMessageBody.get("email")
                     );
+                    UserDataBase.addUser(user);
                     log.debug("Create User ! = {}", user);
                 }
+
+                if (url.equals("/user/login")) {
+                    User savedUser = UserDataBase.findUserById(userId);
+                    log.debug("saved User = {}", savedUser);
+                    if (!UserDataBase.login(savedUser, userId, password)) {
+                        httpResponse = HttpResponse.found("/user/login_failed.html");
+                        httpResponse.flush(out);
+                        log.debug("Login Fail! userId = {}", userId);
+                        return;
+                    }
+                    log.debug("Login Complete! userId = {}", userId);
+                    httpResponse = HttpResponse.found("/index.html", true);
+                    log.info("Response Headers = {}", httpResponse.getResponseHeaders());
+                    httpResponse.flush(out);
+                }
+
                 httpResponse = HttpResponse.found("/index.html");
             }
             httpResponse.flush(out);
