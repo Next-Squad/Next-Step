@@ -2,7 +2,9 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,10 +88,27 @@ public class RequestHandler extends Thread {
                 }
 
             } else if (url.equals("/user/list")){
-                //TODO: 사용자 목록 출력하기
+                //TODO: 한글 깨짐 해결하기
                 if (cookies.get("logined").equals("true")) {
                     log.debug("쿠키확인: {}" , cookies.get("logined"));
-                    response(out, "/user/list.html");
+                    Collection<User> users = DataBase.findAll();
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("<table>");
+                    sb.append("<th>#</th> <th>사용자 아이디</th> <th>이름</th> <th>이메일</th><th></th>");
+                    sb.append("<tbody>");
+                    for (User u : users) {
+                        sb.append("<tr>");
+                        sb.append("<td>" + u.getUserId() + "<td>");
+                        sb.append("<td>" + u.getName() + "<td>");
+                        sb.append("<td>" + u.getEmail() + "<td>");
+                        sb.append("</tr>");
+                    }
+                    sb.append("</tbody>");
+                    sb.append("</table>");
+                    byte[] body = sb.toString().getBytes(StandardCharsets.UTF_8);
+                    DataOutputStream dos = new DataOutputStream(out);
+                    response200Header(dos, body.length);
+                    responseBody(dos, body);
                 } else {
                     response(out, "/user/login.html");
                 }
