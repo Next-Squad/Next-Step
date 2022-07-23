@@ -26,15 +26,15 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
 
-
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             dos = new DataOutputStream(out);
             br = new BufferedReader(new InputStreamReader(in));
 
             Request request = readRequest(br);
-            sendResponse(makeResponseOf(request));
-            br.close();
+            Response response = makeResponseOf(request);
 
+            sendResponse(response);
+            br.close();
         } catch (IOException e) {
             log.error(e.getMessage());
         }
