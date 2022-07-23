@@ -2,7 +2,10 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import db.DataBase;
@@ -34,6 +37,7 @@ public class RequestHandler extends Thread {
             String url = parseLine(line);
 
             int contentLength = 0;
+            Map<String, String> cookies = new HashMap<>();
             //2단계 + 3단계
             if (line == null) {
                 return;
@@ -42,6 +46,10 @@ public class RequestHandler extends Thread {
                 line = br.readLine();
                 if (line.contains("Content-Length")){
                     contentLength = getContentLength(line);
+                }
+                if (line.contains("Cookie")){
+                    cookies = HttpRequestUtils.parseCookies(line);
+                    log.debug("쿠키: {}", cookies);
                 }
                 log.debug("header: {}", line);
             }
@@ -56,6 +64,7 @@ public class RequestHandler extends Thread {
 
                 DataOutputStream dos = new DataOutputStream(out);
                 response302Header(dos, "/index.html");
+
             } else if (url.equals("/user/login")){
                 String body = IOUtils.readData(br, contentLength);
                 Map<String, String> params = HttpRequestUtils.parseQueryString(body);
@@ -69,9 +78,39 @@ public class RequestHandler extends Thread {
                 if (user.getPassword().equals(params.get("password"))){
                     DataOutputStream dos = new DataOutputStream(out);
                     String cookie = "logined=true";
-                    responseLogin302Header(dos, cookie);
+                    String redirect ="/index.html";
+                    responseLogin302Header(dos, cookie, redirect);
                 } else {
-                    response(out, "/user/login_failed.html");
+                    DataOutputStream dos = new DataOutputStream(out);
+                    String cookie = "logined=false";
+                    String redirect = "/user/login_failed.html";
+                    responseLogin302Header(dos, cookie, redirect);
+                }
+
+            } else if (url.equals("/user/list")){
+                //TODO: 한글 깨짐 해결하기
+                if (cookies.get("logined").equals("true")) {
+                    log.debug("쿠키확인: {}" , cookies.get("logined"));
+                    Collection<User> users = DataBase.findAll();
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("<table>");
+                    sb.append("<th>#</th> <th>사용자 아이디</th> <th>이름</th> <th>이메일</th><th></th>");
+                    sb.append("<tbody>");
+                    for (User u : users) {
+                        sb.append("<tr>");
+                        sb.append("<td>" + u.getUserId() + "<td>");
+                        sb.append("<td>" + u.getName() + "<td>");
+                        sb.append("<td>" + u.getEmail() + "<td>");
+                        sb.append("</tr>");
+                    }
+                    sb.append("</tbody>");
+                    sb.append("</table>");
+                    byte[] body = sb.toString().getBytes(StandardCharsets.UTF_8);
+                    DataOutputStream dos = new DataOutputStream(out);
+                    response200Header(dos, body.length);
+                    responseBody(dos, body);
+                } else {
+                    response(out, "/user/login.html");
                 }
 
             } else {
@@ -93,11 +132,11 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void responseLogin302Header(DataOutputStream dos, String cookie) {
+    private void responseLogin302Header(DataOutputStream dos, String cookie, String url) {
         try {
             dos.writeBytes("HTTP/1.1 302 Redirect \r\n");
             dos.writeBytes("Set-Cookie: " + cookie + "\r\n");
-            dos.writeBytes("Location: /index.html" + "\r\n");
+            dos.writeBytes("Location: " + url + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
