@@ -20,7 +20,10 @@ public class UserDataBase {
     }
 
     public static User findUserById(String userId) {
-        return users.get(userId);
+        if (checkExistingUserId(userId)) {
+            return users.get(userId);
+        }
+        return null;
     }
 
     public static Collection<User> findAll() {
@@ -29,5 +32,12 @@ public class UserDataBase {
 
     private static boolean checkExistingUserId(String userId) {
         return users.containsKey(userId);
+    }
+
+    public static boolean login(User user, String userId, String password) { // login 로직이 여기 있는게 맞을까?
+        if (user == null) {
+            return false;
+        }
+        return userId.equals(user.getUserId()) && password.equals(user.getPassword());
     }
 }

@@ -12,8 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
@@ -51,16 +49,30 @@ public class RequestHandler extends Thread {
                 log.debug("HTTP Message Body = {}", messageBody );
 
                 Map<String, String> parsedMessageBody = HttpRequestUtils.parseQueryString(messageBody);
+                String userId = parsedMessageBody.get("userId");
+                String password = parsedMessageBody.get("password");
                 if (url.equals("/user/create")) {
                     User user = new User(
-                        parsedMessageBody.get("userId"),
-                        parsedMessageBody.get("password"),
+                        userId, password,
                         parsedMessageBody.get("name"),
                         parsedMessageBody.get("email")
                     );
                     UserDataBase.addUser(user);
                     log.debug("Create User ! = {}", user);
                 }
+
+                if (url.equals("/user/login")) {
+                    User savedUser = UserDataBase.findUserById(userId);
+                    log.debug("saved User = {}", savedUser);
+                    if (!UserDataBase.login(savedUser, userId, password)) {
+                        httpResponse = HttpResponse.found("/user/login_failed.html");
+                        httpResponse.flush(out);
+                        log.debug("Login Fail! userId = {}", userId);
+                        return;
+                    }
+                    log.debug("Login Complete! userId = {}", userId);
+                }
+
                 httpResponse = HttpResponse.found("/index.html");
             }
             httpResponse.flush(out);

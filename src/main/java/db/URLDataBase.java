@@ -13,6 +13,7 @@ public class URLDataBase {
 		registerdURLs.add("/index.html");
 		registerdURLs.add("/user/form.html");
 		registerdURLs.add("/user/login.html");
+		registerdURLs.add("/user/login_failed.html");
 	}
 
 	public static boolean contains(String url) {
