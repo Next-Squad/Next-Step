@@ -28,7 +28,7 @@ public class ResponseHeaders {
 	}
 
 	public void setCookie(boolean cookie) {
-		headers.put("Set-Cookie", "logined=" + cookie);
+		headers.put("Set-Cookie", "logined=" + cookie + "; path=/;");
 	}
 
 	@Override
