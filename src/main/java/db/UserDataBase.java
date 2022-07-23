@@ -6,9 +6,11 @@ import java.util.Map;
 
 import model.User;
 
-public class DataBase {
+public class UserDataBase {
 
     private static final Map<String, User> users = new HashMap<>();
+
+    private UserDataBase() {}
 
     public static void addUser(User user) {
         if (checkExistingUserId(user.getUserId())) {
