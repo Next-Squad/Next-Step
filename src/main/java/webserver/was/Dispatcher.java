@@ -20,7 +20,7 @@ public class Dispatcher {
         String path = request.getUri().getPath();
 
         Handler handler = handlerMapping.findHandler(method, path)
-                .orElseThrow(() -> new IllegalArgumentException("요청에 맞는 핸들러를 찾을 수 없습니다"));
+                .orElseGet(() -> (req) -> HttpResponse.NOT_FOUNT_RESPONSE);
 
         return handler.handle(request);
     }
