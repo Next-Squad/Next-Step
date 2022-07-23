@@ -3,6 +3,8 @@ package util;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -15,7 +17,13 @@ public class HttpRequestUtils {
      * @return
      */
     public static Map<String, String> parseQueryString(String queryString) {
-        return parseValues(queryString, "&");
+        if (queryString == null) {
+            queryString = "";
+        }
+
+        String decoded = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
+
+        return parseValues(decoded, "&");
     }
 
     /**

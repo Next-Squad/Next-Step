@@ -56,9 +56,9 @@ class HttpRequestMessageTest {
                 POST /create/user HTTP/1.1
                 Host: localhost:8080
                 Connection: keep-alive
-                Content-Length: 24
+                Content-Length: 45
                 
-                userId=jay&password=1234
+                userId=jay&password=1234&email=jay%40mail.com
                 """;
             ByteArrayInputStream in = new ByteArrayInputStream(messageString.getBytes());
 
@@ -76,6 +76,7 @@ class HttpRequestMessageTest {
             HttpRequestBody body = requestMessage.body();
             assertThat(body.get("userId")).isEqualTo("jay");
             assertThat(body.get("password")).isEqualTo("1234");
+            assertThat(body.get("email")).isEqualTo("jay@mail.com");
         }
     }
 }
