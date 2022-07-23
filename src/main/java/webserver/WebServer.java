@@ -6,9 +6,12 @@ import java.util.Map;
 
 import dispatcher.*;
 import handler.Handler;
+import handler.HomeHandler;
+import handler.LoginHandler;
 import handler.UserHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import service.LoginService;
 import service.UserService;
 import webserver.Request.HttpMethod;
 
@@ -23,8 +26,11 @@ public class WebServer {
         } else {
             port = Integer.parseInt(args[0]);
         }
+        UserService userService = new UserService();
         Map<MappingRegistry, Handler> handlerMap = Map.of(
-                new MappingRegistry(HttpMethod.GET, "/user/create"), new UserHandler(new UserService())
+                new MappingRegistry(HttpMethod.GET, "/user/create"), new UserHandler(userService),
+                new MappingRegistry(HttpMethod.GET, "/"), new HomeHandler(),
+                new MappingRegistry(HttpMethod.POST, "/user/login"), new LoginHandler(new LoginService(), userService)
         );
 
         HandlerMapping handlerMapping = new HandlerMapping(handlerMap);

@@ -27,6 +27,13 @@ public class UserHandler implements Handler {
 
     @Override
     public Response doPost(Request request, Response response) {
-        return null;
+        RequestParams params = request.getParams();
+        userService.saveUser(params.getParam("userId"),
+                params.getParam("password"),
+                params.getParam("name"),
+                params.getParam("email"));
+
+        response.redirect("/");
+        return response;
     }
 }

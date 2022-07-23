@@ -60,9 +60,7 @@ public class Response {
         return stringBuilder.toString();
     }
 
-
-
-
-
-
+    public void setSession(String sessionId) {
+        headers.setHeader("Set-Cookie", "login=" + sessionId);
+    }
 }

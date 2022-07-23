@@ -2,7 +2,10 @@ package webserver.Response;
 
 public enum HttpStatus {
 
-    OK("OK", 200), BAD_REQUEST("Bad request", 400), REDIRECT("Found", 302);
+    OK("OK", 200),
+    BAD_REQUEST("Bad request", 400),
+    FORBIDDEN("Forbidden", 403),
+    REDIRECT("Found", 302);
 
     private final String message;
     private final int code;

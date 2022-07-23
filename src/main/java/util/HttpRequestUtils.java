@@ -1,18 +1,22 @@
 package util;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import webserver.Header;
+import webserver.Request.HttpMethod;
+import webserver.Request.Request;
+import webserver.Request.RequestLine;
+import webserver.Request.Uri;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.google.common.base.Strings;
-import com.google.common.base.Utf8;
-import com.google.common.collect.Maps;
-import webserver.Header;
-import webserver.Request.*;
 
 public class HttpRequestUtils {
     /**
@@ -38,7 +42,7 @@ public class HttpRequestUtils {
         RequestLine requestLine = parseRequestLine(line);
 
         Map<String, String> headers = new HashMap<>();
-        while ((line = bufferedReader.readLine()).isEmpty()) {
+        while (!(line = bufferedReader.readLine()).isEmpty()) {
             Pair header = parseHeader(line);
             headers.put(header.key, header.value);
         }

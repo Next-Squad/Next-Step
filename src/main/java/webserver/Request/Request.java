@@ -1,8 +1,12 @@
 package webserver.Request;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import webserver.Header;
+import webserver.RequestHandler;
 
 public class Request {
+    private static final Logger log = LoggerFactory.getLogger(Request.class);
 
     private final RequestLine requestLine;
     private final Header headers;
@@ -19,6 +23,7 @@ public class Request {
     }
 
     public static Request post(RequestLine requestLine, Header headers, String requestBody) {
+        log.debug("requestBody = {}",requestBody);
         return new Request(requestLine, headers, new RequestParams(requestBody));
     }
 
