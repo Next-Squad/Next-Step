@@ -1,7 +1,9 @@
 package db;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import model.User;
@@ -26,8 +28,10 @@ public class UserDataBase {
         return null;
     }
 
-    public static Collection<User> findAll() {
-        return users.values();
+    public static List<User> findAll() {
+        List<User> userList = new ArrayList<>();
+        users.forEach((k, v) -> userList.add(v));
+        return userList;
     }
 
     private static boolean checkExistingUserId(String userId) {

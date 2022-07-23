@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collection;
+import java.util.List;
+import model.User;
 
 public class HttpResponse {
 
@@ -44,6 +47,36 @@ public class HttpResponse {
 
 	public static HttpResponse ok(String viewName) throws IOException {
 		byte[] messageBody = Files.readAllBytes(new File("./webapp" + viewName).toPath());
+		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
+		ResponseHeaders responseHeaders = new ResponseHeaders();
+		responseHeaders.setContentType("text/html;charset=utf-8");
+		responseHeaders.setContentLength(messageBody.length);
+		ResponseMessageBody responseMessageBody = new ResponseMessageBody(messageBody);
+		return new HttpResponse(statusLine, responseHeaders, responseMessageBody);
+	}
+
+	public static HttpResponse ok(String viewName, List<User> users) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		List<String> fileLines = Files.readAllLines(new File("./webapp" + viewName).toPath());
+		for (String fileLine : fileLines) {
+			if (fileLine.equals("<!-- user list -->")) {
+				int userCount = 0;
+				sb.append("              <tbody>\r\n");
+				for (User user : users) {
+					userCount++;
+					sb.append("                <tr>\r\n");
+					sb.append("                    <th scope=\"row\">").append(userCount).append("</th>");
+					sb.append(" <td>").append(user.getUserId()).append("</td>");
+					sb.append(" <td>").append(user.getName()).append("</td>");
+					sb.append(" <td>").append(user.getEmail()).append("</td>");
+					sb.append("<td><a href=\"#\" class=\"btn btn-success\" role=\"button\">수정</a></td>\r\n");
+					sb.append("                </tr>\r\n");
+				}
+				sb.append("              </tbody>\r\n");
+			}
+			sb.append(fileLine).append("\r\n");
+		}
+		byte[] messageBody = sb.toString().getBytes(StandardCharsets.UTF_8);
 		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
 		ResponseHeaders responseHeaders = new ResponseHeaders();
 		responseHeaders.setContentType("text/html;charset=utf-8");
