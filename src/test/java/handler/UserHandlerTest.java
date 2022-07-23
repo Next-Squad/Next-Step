@@ -50,7 +50,7 @@ class UserHandlerTest extends HandlerTest {
 
             // when
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            User savedUser = DataBase.findUserById(expectedUser.getUserId());
+            User savedUser = DataBase.findUserById(expectedUser.userId());
 
             // then
             assertThat(response.statusCode()).isEqualTo(302);
@@ -78,8 +78,8 @@ class UserHandlerTest extends HandlerTest {
             DataBase.addUser(expectedUser);
             BodyPublisher bodyPublisher = BodyPublishers.ofString(getParameterFromMap(
                     Map.of(
-                            "userId", expectedUser.getUserId(),
-                            "password", expectedUser.getPassword()
+                            "userId", expectedUser.userId(),
+                            "password", expectedUser.password()
                     )
             ));
 
@@ -117,8 +117,8 @@ class UserHandlerTest extends HandlerTest {
             DataBase.addUser(expectedUser);
             BodyPublisher bodyPublisher = BodyPublishers.ofString(getParameterFromMap(
                     Map.of(
-                            "userId", expectedUser.getUserId(),
-                            "password", expectedUser.getPassword() + "5678"
+                            "userId", expectedUser.userId(),
+                            "password", expectedUser.password() + "5678"
                     )
             ));
 
@@ -192,10 +192,10 @@ class UserHandlerTest extends HandlerTest {
     }
 
     private String getUserCreateParameters(User user) {
-        return "userId=" + user.getUserId() +
-                "&password=" + user.getPassword() +
-                "&name=" + user.getName() +
-                "&email=" + user.getEmail();
+        return "userId=" + user.userId() +
+                "&password=" + user.password() +
+                "&name=" + user.name() +
+                "&email=" + user.email();
     }
 
     private String getParameterFromMap(Map<String, String> map) {
