@@ -8,47 +8,83 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import webserver.domain.HttpMethod;
+import webserver.domain.RequestHeader;
+import webserver.domain.RequestLine;
 
 public class Request {
 
 	private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-	private Response response = new Response();
-
-	public void parseRequest(InputStream in, OutputStream out) throws IOException {
+	public RequestLine handleUserRequest(InputStream in) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
 
-		processRequestLine(out, bufferedReader);
+		RequestLine requestLine = parseHeader(bufferedReader);
+		processHttpMethod(requestLine);
+
+		return requestLine;
 	}
 
-	private void processRequestLine(OutputStream out, BufferedReader bufferedReader)
+	private RequestLine parseHeader(BufferedReader bufferedReader)
 		throws IOException {
+		RequestHeader requestHeader = new RequestHeader();
 
+		//1.RequestLine
 		String line = bufferedReader.readLine();
-		log.debug("**{}", line);
-		if (line == null) {
-			return;
+		log.debug("requestHeader: {}", line);
+		requestHeader.makeRequestLine(line);
+
+		//2.RequestHeaders
+		List<String> requestHeaders = new ArrayList<>();
+		while (!"".equals(line)) {
+			line = bufferedReader.readLine();
+			log.debug("requestHeader: {}", line);
+
+			if (!"".equals(line)) {
+				requestHeaders.add(line);
+			}
+
+			if (line == null) {
+				return requestHeader.getRequestLine();
+			}
 		}
+		requestHeader.setRequestHeaders(requestHeaders);
 
-		String[] requestLine = line.split(" ");
-		String httpMethod = requestLine[0];
-		String url = requestLine[1];
-		String httpVersion = requestLine[2];
+//		line = bufferedReader.readLine();
+//		List<String> body = new ArrayList<>();
+//		while (!"".equals(line)) {
+//			if (line == null) {
+//				break;
+//			}
+//			body.add(line);
+//			line = bufferedReader.readLine();
+//		}
+//		requestHeader.setBody(body);
 
-		if (httpMethod.equals("GET")) {
+		return requestHeader.getRequestLine();
+	}
+
+	private void processHttpMethod(RequestLine requestLine) {
+		HttpMethod httpMethod = requestLine.getHttpMethod();
+		String url = requestLine.getUrl();
+
+		if (httpMethod.equals(HttpMethod.GET)) {
 			int indexOfQueryParameter = url.indexOf('?');
 			if (indexOfQueryParameter != -1) {
 				processQueryParameter(url, indexOfQueryParameter);
 			}
+		} else if (httpMethod.equals(HttpMethod.POST)) {
 
-			response.makeResponse(url, out);
 		}
+
 	}
 
 	private void processQueryParameter(String url, int indexOfQueryParameter) {
