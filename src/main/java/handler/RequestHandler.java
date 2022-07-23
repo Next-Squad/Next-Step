@@ -1,6 +1,7 @@
 package handler;
 
 import controller.FrontController;
+import db.DataBase;
 import http.request.HttpMethod;
 import http.request.HttpRequest;
 import http.request.RequestLine;
@@ -63,6 +64,7 @@ public class RequestHandler extends Thread {
                         parsedMessageBody.get("name"),
                         parsedMessageBody.get("email")
                     );
+                    DataBase.addUser(user);
                     log.debug("Create User ! = {}", user);
                 }
                 httpResponse = HttpResponse.found("/index.html");
