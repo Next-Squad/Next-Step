@@ -31,6 +31,10 @@ public class ResponseHeaders {
 		headers.put("Set-Cookie", "logined=" + cookie + "; path=/;");
 	}
 
+	public void setAccept(String content) {
+		headers.put("Accept", content);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

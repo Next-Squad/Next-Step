@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Collection;
 import java.util.List;
 import model.User;
 
@@ -48,8 +47,12 @@ public class HttpResponse {
 	public static HttpResponse ok(String viewName) throws IOException {
 		byte[] messageBody = Files.readAllBytes(new File("./webapp" + viewName).toPath());
 		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
+		String[] urlTokens = viewName.split("\\.");
+		String extension = urlTokens[urlTokens.length - 1];
+
 		ResponseHeaders responseHeaders = new ResponseHeaders();
-		responseHeaders.setContentType("text/html;charset=utf-8");
+		responseHeaders.setContentType("text/"+extension+";charset=utf-8");
+		responseHeaders.setAccept("text/"+extension+", */*; q=0.1");
 		responseHeaders.setContentLength(messageBody.length);
 		ResponseMessageBody responseMessageBody = new ResponseMessageBody(messageBody);
 		return new HttpResponse(statusLine, responseHeaders, responseMessageBody);
@@ -101,6 +104,16 @@ public class HttpResponse {
 		responseHeaders.setLocation(redirectURI);
 		responseHeaders.setCookie(cookie);
 		return new HttpResponse(statusLine, responseHeaders);
+	}
+
+	public static HttpResponse notHTML(String extension, String viewName) throws IOException {
+		byte[] messageBody = Files.readAllBytes(new File("./webapp/" + viewName).toPath());
+		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
+		ResponseHeaders responseHeaders = new ResponseHeaders();
+		responseHeaders.setAccept("text/"+extension+", */*; q=0.1");
+		responseHeaders.setContentLength(messageBody.length);
+		ResponseMessageBody responseMessageBody = new ResponseMessageBody(messageBody);
+		return new HttpResponse(statusLine, responseHeaders, responseMessageBody);
 	}
 
 	public void flush(OutputStream out) throws IOException {
