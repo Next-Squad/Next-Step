@@ -22,4 +22,11 @@ public class RequestHeaders {
 	public boolean containsKey(String key) {
 		return headers.containsKey(key);
 	}
+
+	public String getCookie() {
+		if (headers.containsKey("Cookie")) {
+			return headers.get("Cookie");
+		}
+		return null;
+	}
 }

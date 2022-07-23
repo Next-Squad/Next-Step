@@ -4,6 +4,7 @@ import db.URLDataBase;
 import db.UserDataBase;
 import http.request.HttpMethod;
 import http.request.HttpRequest;
+import http.request.RequestHeaders;
 import http.request.RequestLine;
 import http.request.RequestMessageBody;
 import http.request.RequestURI;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
@@ -39,8 +41,27 @@ public class RequestHandler extends Thread {
             RequestURI requestUri = requestLine.getRequestUri();
             String url = requestUri.getPath();
 
-            if (requestLine.getHttpMethod().equals(HttpMethod.GET) && URLDataBase.contains(url)) {
-                httpResponse = HttpResponse.ok(url);
+            if (requestLine.getHttpMethod().equals(HttpMethod.GET)) {
+                if (URLDataBase.contains(url)) {
+                    httpResponse = HttpResponse.ok(url);
+                }
+                if (url.equals("/user/list")) {
+                    RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
+                    String cookies = requestHeaders.getCookie();
+                    log.debug("Cookie= {}", cookies);
+                    if (cookies == null) {
+                        httpResponse = HttpResponse.ok("/user/login.html");
+                    }
+
+                    if (cookies != null) {
+                        Map<String, String> parseCookies = HttpRequestUtils.parseCookies(cookies);
+                        if (parseCookies.get("logined").equals("false")) {
+                            httpResponse = HttpResponse.ok("/user/login.html");
+                        }
+                        httpResponse = HttpResponse.ok("/user/list.html", UserDataBase.findAll());
+                    }
+                }
+                httpResponse.flush(out);
             }
 
             if (requestLine.getHttpMethod().equals(HttpMethod.POST)) {
