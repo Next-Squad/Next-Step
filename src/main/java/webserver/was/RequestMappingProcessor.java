@@ -29,8 +29,8 @@ public class RequestMappingProcessor {
     private void processHandlerClass(Class<?> handlerClass) {
         for (Field field : handlerClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(RequestMapping.class)) {
-                // public 혹은 protected 인지 확인
-                validateModifierPublicORProtected(field);
+                // public 인지 확인
+                validateModifierPublic(field);
 
                 // Handler 타입의 필드인지 확인
                 validateType(field, Handler.class);
@@ -78,20 +78,24 @@ public class RequestMappingProcessor {
                  InstantiationException |
                  IllegalAccessException |
                  InvocationTargetException e) {
-            throw new RuntimeException(getFullPackageName(field.getDeclaringClass()) + "에 접근 가능한 기본 생성자가 없습니다.", e);
+            String fullPackageName = getFullPackageName(field.getDeclaringClass());
+            String errorMessage = fullPackageName + "에 접근 가능한 기본 생성자가 없습니다.";
+
+            throw new IllegalStateException(errorMessage, e);
         }
     }
 
-    private void validateModifierPublicORProtected(Field field) {
-        if (!Modifier.isPublic(field.getModifiers()) && !Modifier.isProtected(field.getModifiers())) {
-            throw new IllegalStateException(getFullPackageName(field) + "는 public 혹은 protected 이어야 합니다.");
+    private void validateModifierPublic(Field field) {
+        if (!Modifier.isPublic(field.getModifiers())) {
+            throw new IllegalStateException(getFullPackageName(field) + "는 public 이어야 합니다.");
         }
     }
 
     private void validateType(Field field, Class<?> requiredClass) {
         if (!field.getType()
                 .equals(requiredClass)) {
-            throw new IllegalStateException(getFullPackageName(field) + "는 " + requiredClass.getName() + " 타입이어야 합니다.");
+            String errorMessage = String.format("%s 는 %s 타입이어야 합니다.", getFullPackageName(field), requiredClass.getName());
+            throw new IllegalStateException(errorMessage);
         }
     }
 

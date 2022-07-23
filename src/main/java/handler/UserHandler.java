@@ -11,8 +11,10 @@ import webserver.was.RequestMapping;
 
 public class UserHandler {
 
+    private UserHandler() { }
+
     @RequestMapping(method = HttpMethod.POST, url = "/user/create")
-    protected final Handler CREATE_USER = (request) -> {
+    public final Handler CREATE_USER = (request) -> {
         HttpRequestBody requestBody = request.getRequestBody();
         User user = new User(
                 requestBody.get("userId"),
