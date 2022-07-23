@@ -20,6 +20,6 @@ public class HandlerMapping {
     }
 
     public Optional<Handler> findHandler(HttpMethod method, String path) {
-        return Optional.of(mappingInfo.get(new RequestMappingInfo(method, path)));
+        return Optional.ofNullable(mappingInfo.get(new RequestMappingInfo(method, path)));
     }
 }
