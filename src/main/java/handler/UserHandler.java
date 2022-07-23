@@ -26,4 +26,35 @@ public class UserHandler {
 
         return new HttpResponse(HttpStatus.FOUND, header);
     };
+
+    @RequestMapping(method = HttpMethod.POST, url = "/user/login")
+    public final Handler LOGIN = request -> {
+        HttpRequestBody requestBody = request.getRequestBody();
+        String userId = requestBody.get("userId");
+        String password = requestBody.get("password");
+
+        User user = DataBase.findUserById(userId);
+
+        HttpHeader header = new HttpHeader();
+        String loginFailedViewName = "/user/login_failed.html";
+
+        if (user == null) {
+            header.add("Set-Cookie", "logined=false");
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.NOT_FOUND, header);
+            httpResponse.setViewName(loginFailedViewName);
+            return httpResponse;
+        }
+
+        if (!user.isCorrectPassword(password)) {
+            header.add("Set-Cookie", "logined=false");
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED, header);
+            httpResponse.setViewName(loginFailedViewName);
+            return httpResponse;
+        }
+
+        header.add("Set-Cookie", "logined=true");
+        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, header);
+        httpResponse.setViewName("/index.html");
+        return httpResponse;
+    };
 }
