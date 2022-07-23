@@ -32,8 +32,10 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
 
             Request request = readRequest(in);
-            Response response = Response.of(request.getRequestLine().getProtocol());
-            dispatcher.dispatch(request, response);
+            log.debug("{}", request.getUriPath());
+            Response response = dispatcher.dispatch(request, Response.of(request.getRequestLine().getProtocol()));
+            log.debug("{}", response.responseHeaderToString());
+            response.writeResponse(new DataOutputStream(out));
 
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -44,23 +46,4 @@ public class RequestHandler extends Thread {
         return HttpRequestUtils.toRequest(inputStream);
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void responseBody(DataOutputStream dos, byte[] body) {
-        try {
-            dos.write(body, 0, body.length);
-            dos.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
 }

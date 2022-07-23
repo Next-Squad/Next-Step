@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
+import com.google.common.base.Utf8;
 import com.google.common.collect.Maps;
-import webserver.Headers;
+import webserver.Header;
 import webserver.Request.*;
 
 public class HttpRequestUtils {
@@ -31,7 +33,7 @@ public class HttpRequestUtils {
 
 
     public static Request toRequest(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String line = bufferedReader.readLine();
         RequestLine requestLine = parseRequestLine(line);
 
@@ -41,7 +43,13 @@ public class HttpRequestUtils {
             headers.put(header.key, header.value);
         }
 
-        return new Request(requestLine, new Headers(headers));
+        if (headers.containsKey("Content-Length")) {
+            String contentLength = headers.get("Content-Length");
+            String body = IOUtils.readData(bufferedReader, Integer.parseInt(contentLength));
+            return Request.post(requestLine, new Header(headers), body);
+        }
+
+        return Request.get(requestLine, new Header(headers));
     }
 
     private static RequestLine parseRequestLine(String requestLine) {

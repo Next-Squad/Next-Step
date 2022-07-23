@@ -1,22 +1,32 @@
 package webserver.Request;
 
-import webserver.Headers;
+import webserver.Header;
 
 public class Request {
 
     private final RequestLine requestLine;
-    private final Headers headers;
+    private final Header headers;
+    private final RequestParams params;
 
-    public Request(RequestLine requestLine, Headers headers) {
+    private Request(RequestLine requestLine, Header headers, RequestParams params) {
         this.requestLine = requestLine;
         this.headers = headers;
+        this.params = params;
+    }
+
+    public static Request get(RequestLine requestLine, Header headers) {
+        return new Request(requestLine, headers, new RequestParams(requestLine.getUri().getQuery()));
+    }
+
+    public static Request post(RequestLine requestLine, Header headers, String requestBody) {
+        return new Request(requestLine, headers, new RequestParams(requestBody));
     }
 
     public RequestLine getRequestLine() {
         return requestLine;
     }
 
-    public Headers getHeaders() {
+    public Header getHeaders() {
         return headers;
     }
 
@@ -36,5 +46,7 @@ public class Request {
         return requestLine.getUri().isResourcePath();
     }
 
-
+    public RequestParams getParams() {
+        return params;
+    }
 }

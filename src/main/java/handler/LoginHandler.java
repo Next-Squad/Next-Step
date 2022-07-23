@@ -1,14 +1,14 @@
 package handler;
 
-import service.LoginService;
+import service.UserService;
 import webserver.Request.Request;
 import webserver.Response.Response;
 
 public class LoginHandler implements Handler{
 
-    private final LoginService loginService;
+    private final UserService loginService;
 
-    public LoginHandler(LoginService loginService) {
+    public LoginHandler(UserService loginService) {
         this.loginService = loginService;
     }
 

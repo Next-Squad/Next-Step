@@ -1,5 +1,6 @@
 package dispatcher;
 
+import webserver.ContentType;
 import webserver.Request.Request;
 import webserver.Response.Response;
 
@@ -15,8 +16,7 @@ public class ResourceHandler {
         String uriPath = request.getUriPath();
         try {
             byte[] bytes = Files.readAllBytes(new File(RESOURCE_PATH + uriPath).toPath());
-
-            response.setResponseBody(bytes);
+            response.setResponseBody(bytes, ContentType.getContentType(uriPath));
         } catch (IOException e) {
             // TODO 예외처리
             e.printStackTrace();
