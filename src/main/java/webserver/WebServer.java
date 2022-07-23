@@ -10,14 +10,15 @@ import org.slf4j.LoggerFactory;
 import webserver.was.Dispatcher;
 import webserver.was.HandlerMapping;
 import webserver.was.RequestMappingProcessor;
+import webserver.was.ViewResolver;
 
 public class WebServer {
     private static final Logger log = LoggerFactory.getLogger(WebServer.class);
     private static final int DEFAULT_PORT = 8080;
     private static final String WEB_APP_PATH = "./webapp";
 
-    public static void main(String args[]) throws Exception {
-        int port = 0;
+    public static void main(String[] args) throws Exception {
+        int port;
         if (args == null || args.length == 0) {
             port = DEFAULT_PORT;
         } else {
@@ -36,7 +37,8 @@ public class WebServer {
 
             // Dispatcher 를 초기화 한다.
             HandlerMapping handlerMapping = new HandlerMapping(mappingProcessor.getHandlerMappingInfo());
-            Dispatcher dispatcher = new Dispatcher(handlerMapping);
+            ViewResolver viewResolver = new ViewResolver(WEB_APP_PATH);
+            Dispatcher dispatcher = new Dispatcher(handlerMapping, viewResolver);
             log.info("Initialize Dispatcher");
 
             // 클라이언트가 연결될때까지 대기한다.
