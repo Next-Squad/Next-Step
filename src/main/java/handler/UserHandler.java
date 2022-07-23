@@ -11,8 +11,6 @@ import webserver.was.RequestMapping;
 
 public class UserHandler {
 
-    private UserHandler() { }
-
     @RequestMapping(method = HttpMethod.POST, url = "/user/create")
     public final Handler CREATE_USER = (request) -> {
         HttpRequestBody requestBody = request.getRequestBody();
