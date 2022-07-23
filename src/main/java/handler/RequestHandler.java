@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.Map;
 import model.User;
 import org.slf4j.Logger;
@@ -42,7 +41,8 @@ public class RequestHandler extends Thread {
             String url = requestUri.getPath();
 
             if (requestLine.getHttpMethod().equals(HttpMethod.GET)) {
-                if (URLDataBase.contains(url)) {
+                if (URLDataBase.contains(url) || url.contains(".css") || url.contains(".js")
+                    || url.contains(".woff") || url.contains(".ico")) {
                     httpResponse = HttpResponse.ok(url);
                 }
                 if (url.equals("/user/list")) {
