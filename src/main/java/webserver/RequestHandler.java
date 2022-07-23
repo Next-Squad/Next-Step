@@ -2,13 +2,14 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.xml.crypto.Data;
+import webserver.request.Request;
+import webserver.response.Response;
+import webserver.response.ResponseMaker;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -29,8 +30,7 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             dos = new DataOutputStream(out);
             br = new BufferedReader(new InputStreamReader(in));
-
-            Request request = readRequest(br);
+            Request request = readRequest();
             Response response = makeResponseOf(request);
 
             sendResponse(response);
@@ -40,19 +40,32 @@ public class RequestHandler extends Thread {
         }
     }
 
-    public Request readRequest(BufferedReader br) throws IOException {
-        Request request = new Request(br.readLine());
+    public Request readRequest() throws IOException {
+        String firstLine = br.readLine();
+        Request request = new Request(firstLine);
+        request.setParams(parseParams());
         log.debug("method: {}, uri: {}", request.getMethod(), request.getUri());
         return request;
     }
 
-    public Response makeResponseOf(Request request) {
-        try {
-            byte[] body = Files.readAllBytes(new File("./webapp" + request.getUri()).toPath());
-            return new Response(StatusCode.OK, body);
-        } catch (IOException e) {
-            return new Response(StatusCode.OK, "헬로우 월드!".getBytes(StandardCharsets.UTF_8));
+    private Map<String, String> parseParams() throws IOException {
+        Map<String, String> params = new HashMap<>();
+        String line = br.readLine();
+        while (line.length() != 0 && !(line.equals("\r\n"))) {
+            log.debug(line);
+            line = br.readLine();
         }
+        if (line.length() != 0) {
+            String[] paramsString = br.readLine().split("&");
+            for (String param : paramsString) {
+                params.put(param.split("=")[0], param.split("=")[1]);
+            }
+        }
+        return params;
+    }
+
+    public Response makeResponseOf(Request request) {
+        return responseMaker.getResponse(request);
     }
 
     public void sendResponse(Response response) {
@@ -64,25 +77,4 @@ public class RequestHandler extends Thread {
         }
 
     }
-
-//    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
-//        try {
-//            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-//            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-//            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
-//            dos.writeBytes("\r\n");
-//        } catch (IOException e) {
-//            log.error(e.getMessage());
-//        }
-//    }
-//
-//
-//    private void responseBody(DataOutputStream dos, byte[] body) {
-//        try {
-//            dos.write(body, 0, body.length);
-//            dos.flush();
-//        } catch (IOException e) {
-//            log.error(e.getMessage());
-//        }
-//    }
 }
