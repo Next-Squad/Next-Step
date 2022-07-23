@@ -28,7 +28,7 @@ public class WebServer {
         }
         UserService userService = new UserService();
         Map<MappingRegistry, Handler> handlerMap = Map.of(
-                new MappingRegistry(HttpMethod.GET, "/user/create"), new UserHandler(userService),
+                new MappingRegistry(HttpMethod.POST, "/user/create"), new UserHandler(userService),
                 new MappingRegistry(HttpMethod.GET, "/"), new HomeHandler(),
                 new MappingRegistry(HttpMethod.POST, "/user/login"), new LoginHandler(new LoginService(), userService)
         );
