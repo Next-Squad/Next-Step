@@ -24,6 +24,14 @@ public class HttpResponse {
 		this.responseMessageBody = responseMessageBody;
 	}
 
+	public StatusLine getStatusLine() {
+		return statusLine;
+	}
+
+	public ResponseHeaders getResponseHeaders() {
+		return responseHeaders;
+	}
+
 	public static HttpResponse ok() {
 		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
 		byte[] messageBody = "Hello World".getBytes(StandardCharsets.UTF_8);
@@ -49,6 +57,16 @@ public class HttpResponse {
 		ResponseHeaders responseHeaders = new ResponseHeaders();
 		responseHeaders.setContentType("text/html;charset=utf-8");
 		responseHeaders.setLocation(redirectURI);
+		responseHeaders.setCookie(false);
+		return new HttpResponse(statusLine, responseHeaders);
+	}
+
+	public static HttpResponse found(String redirectURI, boolean cookie) {
+		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.FOUND);
+		ResponseHeaders responseHeaders = new ResponseHeaders();
+		responseHeaders.setContentType("text/html;charset=utf-8");
+		responseHeaders.setLocation(redirectURI);
+		responseHeaders.setCookie(cookie);
 		return new HttpResponse(statusLine, responseHeaders);
 	}
 

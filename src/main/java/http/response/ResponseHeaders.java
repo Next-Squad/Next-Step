@@ -27,6 +27,10 @@ public class ResponseHeaders {
 		headers.put("Location", redirectURI);
 	}
 
+	public void setCookie(boolean cookie) {
+		headers.put("Set-Cookie", "logined=" + cookie);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

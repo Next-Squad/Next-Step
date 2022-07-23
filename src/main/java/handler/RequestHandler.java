@@ -71,6 +71,9 @@ public class RequestHandler extends Thread {
                         return;
                     }
                     log.debug("Login Complete! userId = {}", userId);
+                    httpResponse = HttpResponse.found("/index.html", true);
+                    log.info("Response Headers = {}", httpResponse.getResponseHeaders());
+                    httpResponse.flush(out);
                 }
 
                 httpResponse = HttpResponse.found("/index.html");
