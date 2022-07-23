@@ -1,4 +1,4 @@
-package webserver;
+package webserver.http;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,5 +21,12 @@ public class HttpRequestBody {
 
     public String get(String key) {
         return this.body.get(key);
+    }
+
+    public HttpRequestBody clone() {
+        HttpRequestBody requestBodyClone = new HttpRequestBody();
+        requestBodyClone.body.putAll(this.body);
+
+        return requestBodyClone;
     }
 }

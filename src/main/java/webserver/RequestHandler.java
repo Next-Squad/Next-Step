@@ -1,29 +1,35 @@
 package webserver;
 
-import db.DataBase;
-import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.FileUtils;
+import util.HttpRequestUtils;
+import webserver.http.ContentType;
+import webserver.http.HttpHeader;
+import webserver.http.HttpRequest;
+import webserver.http.HttpRequestMessage;
+import webserver.http.HttpResponse;
+import webserver.http.HttpStatus;
+import webserver.was.Dispatcher;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
 
 public class RequestHandler extends Thread {
 
-    private static final String USER_CREATE_URI_PATH = "/user/create";
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
     private final String webAppPath;
+    private final Dispatcher dispatcher;
 
-    public RequestHandler(Socket connectionSocket, String webAppPath) {
+    public RequestHandler(Socket connectionSocket, String webAppPath, Dispatcher dispatcher) {
         this.connection = connectionSocket;
         this.webAppPath = webAppPath;
+        this.dispatcher = dispatcher;
     }
 
     public void run() {
@@ -32,93 +38,52 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             HttpRequestMessage requestMessage = HttpRequestMessage.parse(in);
-            URI uri = requestMessage.uri();
+            String path = requestMessage.uri().getPath();
 
             // 정적 요청 처리
-            if (isStaticResourceRequest(uri)) {
-                responseStaticResources(out, uri);
+            if (isStaticResourceRequest(path)) {
+                String extension = HttpRequestUtils.parseExtension(path);
+                byte[] file = FileUtils.readFile(webAppPath + path);
+
+                HttpHeader header = new HttpHeader();
+                header.add("Content-Type", ContentType.findByExtension(extension).getHeader());
+                header.add("Content-Length", String.valueOf(file.length));
+
+                flush(out, new HttpResponse(HttpStatus.OK, header, file));
                 return;
             }
 
             // 동적 요청 처리
-            if (isUserCreateRequest(requestMessage, HttpMethod.POST, USER_CREATE_URI_PATH)) {
-                HttpRequestBody body = requestMessage.body();
-                registerNewUser(body);
+            if (dispatcher.isMapped(requestMessage.method(), requestMessage.uri())) {
+                HttpRequest request = HttpRequest.from(requestMessage);
 
-                responseRedirect(out, URI.create("/index.html"));
+                HttpResponse httpResponse = this.dispatcher.handlerRequest(request);
+                flush(out, httpResponse);
             }
-
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private boolean isUserCreateRequest(HttpRequestMessage requestMessage, HttpMethod method, String path) {
-        URI uri = requestMessage.uri();
-        return requestMessage.method().equals(method) && uri.getPath().equals(path);
+    private boolean isStaticResourceRequest(String path) {
+        return ContentType.isExistsByExtension(HttpRequestUtils.parseExtension(path));
     }
 
-    private void responseStaticResources(OutputStream out, URI uri) {
-        DataOutputStream dos = new DataOutputStream(out);
-        byte[] body = FileUtils.readFile(this.webAppPath + uri.getPath());
-        response200Header(dos, body.length);
-        responseBody(dos, body);
-    }
+    private void flush(OutputStream out, HttpResponse response) {
+        try (DataOutputStream dos = new DataOutputStream(out)) {
+            HttpStatus status = response.getStatus();
+            HttpHeader header = response.getHeader();
+            byte[] body = response.getBody();
 
-    private static void registerNewUser(HttpRequestBody requestBody) {
-        User user = new User(
-                requestBody.get("userId"),
-                requestBody.get("password"),
-                requestBody.get("name"),
-                requestBody.get("email"));
-        DataBase.addUser(user);
-    }
-
-    private void responseDynamic(OutputStream out) {
-        DataOutputStream dos = new DataOutputStream(out);
-        byte[] body = new byte[]{};
-        response200Header(dos, body.length);
-        responseBody(dos, body);
-    }
-
-    private void responseRedirect(OutputStream out, URI uri) {
-        DataOutputStream dos = new DataOutputStream(out);
-        byte[] body = new byte[]{};
-        response302Header(dos, uri);
-        responseBody(dos, body);
-    }
-
-    private boolean isStaticResourceRequest(URI uri) {
-        return !uri.getPath().equals(USER_CREATE_URI_PATH);
-    }
-
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
-        try {
-            dos.writeBytes("HTTP/1.1 200 OK \r\n");
-            dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
-            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes(String.format("HTTP/1.1 %d %s \r\n", status.getCode(), status.getStatus()));
+            for (String key : header.keySet()) {
+                dos.writeBytes(String.format("%s: %s\r\n", key, header.get(key)));
+            }
             dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void response302Header(DataOutputStream dos, URI uri) {
-        try {
-            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
-            dos.writeBytes("Location: " + uri.getPath() + "\r\n");
-            dos.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void responseBody(DataOutputStream dos, byte[] body) {
-        try {
             dos.write(body, 0, body.length);
             dos.flush();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

@@ -1,4 +1,4 @@
-package webserver;
+package webserver.http;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,5 +17,12 @@ public class HttpHeader{
 
     public String get(String key) {
         return header.get(key);
+    }
+
+    public HttpHeader clone() {
+        HttpHeader httpHeaderClone = new HttpHeader();
+        httpHeaderClone.header.putAll(this.header);
+
+        return httpHeaderClone;
     }
 }
