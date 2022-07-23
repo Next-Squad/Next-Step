@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 import webserver.domain.HttpMethod;
 import webserver.domain.RequestHeader;
 import webserver.domain.RequestLine;
@@ -24,57 +24,50 @@ public class Request {
 
 	private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
+	private RequestHeader requestHeader;
+	private int contentLength;
+
 	public RequestLine handleUserRequest(InputStream in) throws IOException {
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
 
-		RequestLine requestLine = parseHeader(bufferedReader);
-		processHttpMethod(requestLine);
-
-		return requestLine;
-	}
-
-	private RequestLine parseHeader(BufferedReader bufferedReader)
-		throws IOException {
-		RequestHeader requestHeader = new RequestHeader();
-
-		//1.RequestLine
-		String line = bufferedReader.readLine();
-		log.debug("requestHeader: {}", line);
-		requestHeader.makeRequestLine(line);
-
-		//2.RequestHeaders
-		List<String> requestHeaders = new ArrayList<>();
-		while (!"".equals(line)) {
-			line = bufferedReader.readLine();
-			log.debug("requestHeader: {}", line);
-
-			if (!"".equals(line)) {
-				requestHeaders.add(line);
-			}
-
-			if (line == null) {
-				return requestHeader.getRequestLine();
-			}
-		}
-		requestHeader.setRequestHeaders(requestHeaders);
-
-//		line = bufferedReader.readLine();
-//		List<String> body = new ArrayList<>();
-//		while (!"".equals(line)) {
-//			if (line == null) {
-//				break;
-//			}
-//			body.add(line);
-//			line = bufferedReader.readLine();
-//		}
-//		requestHeader.setBody(body);
+		makeRequestHeader(bufferedReader);
+		processHttpMethod();
 
 		return requestHeader.getRequestLine();
 	}
 
-	private void processHttpMethod(RequestLine requestLine) {
-		HttpMethod httpMethod = requestLine.getHttpMethod();
-		String url = requestLine.getUrl();
+	private void makeRequestHeader(BufferedReader bufferedReader)
+		throws IOException {
+
+		String line = bufferedReader.readLine();
+		String startLine = line;
+		log.debug("requestHeader: {}", line);
+
+		List<String> requestData = new ArrayList<>();
+		while (!"".equals(line)) {
+			line = bufferedReader.readLine();
+			log.debug("requestHeader: {}", line);
+
+			if (line.contains("Content-Length")) {
+				String[] token = line.split(":");
+				contentLength = Integer.parseInt(token[1].trim());
+			}
+
+			if (line == null) {
+				return;
+			}
+			requestData.add(line);
+		}
+
+		requestHeader.setBody(IOUtils.readData(bufferedReader, contentLength));
+
+
+		this.requestHeader = new RequestHeader(startLine, requestData);
+	}
+
+	private void processHttpMethod() {
+		HttpMethod httpMethod = requestHeader.getRequestLine().getHttpMethod();
+		String url = requestHeader.getRequestLine().getUrl();
 
 		if (httpMethod.equals(HttpMethod.GET)) {
 			int indexOfQueryParameter = url.indexOf('?');
@@ -82,7 +75,8 @@ public class Request {
 				processQueryParameter(url, indexOfQueryParameter);
 			}
 		} else if (httpMethod.equals(HttpMethod.POST)) {
-
+			Map<String, String> queryStrings = HttpRequestUtils.parseQueryString(requestHeader.getBody());
+			saveUserInDatabase(queryStrings);
 		}
 
 	}
@@ -93,6 +87,10 @@ public class Request {
 
 		Map<String, String> queryStringMap = HttpRequestUtils.parseQueryString(queryString);
 
+		saveUserInDatabase(queryStringMap);
+	}
+
+	private void saveUserInDatabase(Map<String, String> queryStringMap) {
 		User user = new User();
 		for (Entry<String, String> entry : queryStringMap.entrySet()) {
 			switch (entry.getKey()) {
@@ -113,7 +111,8 @@ public class Request {
 
 		DataBase.addUser(user);
 		DataBase.findAll().stream()
-			.forEach(userInDatabase -> log.debug("**Database.findAll() : {}", userInDatabase.toString()));
+			.forEach(userInDatabase -> log.debug("**Database.findAll() : {}",
+				userInDatabase.toString()));
 		//TODO : index.html로 redirection 되도록 처리해야하지 않을까? 요구사항에 없으니 패스
 	}
 
