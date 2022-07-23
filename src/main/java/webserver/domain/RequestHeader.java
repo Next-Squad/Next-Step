@@ -14,10 +14,6 @@ public class RequestHeader {
 
 	public void makeRequestLine(String startLine) {
 		String[] requestLine = startLine.split(" ");
-		String httpMethod = requestLine[0];
-		String url = requestLine[1];
-		String httpVersion = requestLine[2];
-
-		this.requestLine = new RequestLine(httpMethod, url, httpVersion);
+		this.requestLine = new RequestLine(requestLine[0], requestLine[1], requestLine[2]);
 	}
 }

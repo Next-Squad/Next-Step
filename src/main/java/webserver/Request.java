@@ -112,6 +112,8 @@ public class Request {
 		}
 
 		DataBase.addUser(user);
+		DataBase.findAll().stream()
+			.forEach(userInDatabase -> log.debug("**Database.findAll() : {}", userInDatabase.toString()));
 		//TODO : index.html로 redirection 되도록 처리해야하지 않을까? 요구사항에 없으니 패스
 	}
 
