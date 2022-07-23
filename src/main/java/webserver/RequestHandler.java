@@ -1,30 +1,35 @@
 package webserver;
 
-import db.DataBase;
-import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.FileUtils;
 import util.HttpRequestUtils;
+import webserver.http.ContentType;
+import webserver.http.HttpHeader;
+import webserver.http.HttpRequest;
+import webserver.http.HttpRequestMessage;
+import webserver.http.HttpResponse;
+import webserver.http.HttpStatus;
+import webserver.was.Dispatcher;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
 
 public class RequestHandler extends Thread {
 
-    private static final String USER_CREATE_URI_PATH = "/user/create";
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
     private final String webAppPath;
+    private final Dispatcher dispatcher;
 
-    public RequestHandler(Socket connectionSocket, String webAppPath) {
+    public RequestHandler(Socket connectionSocket, String webAppPath, Dispatcher dispatcher) {
         this.connection = connectionSocket;
         this.webAppPath = webAppPath;
+        this.dispatcher = dispatcher;
     }
 
     public void run() {
@@ -49,14 +54,11 @@ public class RequestHandler extends Thread {
             }
 
             // 동적 요청 처리
-            if (isUserCreateRequest(requestMessage, HttpMethod.POST, USER_CREATE_URI_PATH)) {
-                HttpRequestBody body = requestMessage.body();
-                registerNewUser(body);
+            if (dispatcher.isMapped(requestMessage.method(), requestMessage.uri())) {
+                HttpRequest request = HttpRequest.from(requestMessage);
 
-                HttpHeader header = new HttpHeader();
-                header.add("Location", "/index.html");
-
-                flush(out, new HttpResponse(HttpStatus.FOUND, header));
+                HttpResponse httpResponse = this.dispatcher.handlerRequest(request);
+                flush(out, httpResponse);
             }
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -65,20 +67,6 @@ public class RequestHandler extends Thread {
 
     private boolean isStaticResourceRequest(String path) {
         return ContentType.isExistsByExtension(HttpRequestUtils.parseExtension(path));
-    }
-
-    private boolean isUserCreateRequest(HttpRequestMessage requestMessage, HttpMethod method, String path) {
-        URI uri = requestMessage.uri();
-        return requestMessage.method().equals(method) && uri.getPath().equals(path);
-    }
-
-    private void registerNewUser(HttpRequestBody requestBody) {
-        User user = new User(
-                requestBody.get("userId"),
-                requestBody.get("password"),
-                requestBody.get("name"),
-                requestBody.get("email"));
-        DataBase.addUser(user);
     }
 
     private void flush(OutputStream out, HttpResponse response) {
