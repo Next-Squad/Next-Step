@@ -5,7 +5,11 @@ import java.util.Arrays;
 public enum ContentType {
     TEXT_PLAIN("text/plain", "txt"),
     TEXT_HTML("text/html", "html"),
-    TEXT_CSS("text/css", "css");
+    TEXT_CSS("text/css", "css"),
+    TEXT_JAVASCRIPT("text/javascript", "js"),
+    APPLICATION_X_FONT_TTF("application/x-font-ttf", "ttf"),
+    APPLICATION_X_FONT_WOFF("application/x-font-woff", "woff"),
+    IMAGE_X_ICON("text/x-icon", "ico");
 
     private static final ContentType DEFAULT = TEXT_PLAIN;
 
