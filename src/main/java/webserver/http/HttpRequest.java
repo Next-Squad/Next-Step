@@ -1,6 +1,10 @@
 package webserver.http;
 
+import util.HttpRequestUtils;
+
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class HttpRequest {
@@ -9,6 +13,8 @@ public class HttpRequest {
     private final HttpHeader header;
     private final HttpRequestBody requestBody;
     private final URI uri;
+
+    private final Map<String, String> cookieMap = new HashMap<>();
 
     public HttpRequest(HttpMethod method, HttpHeader header, HttpRequestBody requestBody, URI uri) {
         Objects.requireNonNull(method);
@@ -20,6 +26,11 @@ public class HttpRequest {
         this.header = header.clone();
         this.requestBody = requestBody.clone();
         this.uri = uri;
+
+        if (header.keySet().contains("Cookie")) {
+            String cookies = header.get("Cookie");
+            cookieMap.putAll(HttpRequestUtils.parseCookies(cookies));
+        }
     }
 
     public static HttpRequest from(HttpRequestMessage requestMessage) {
@@ -43,5 +54,9 @@ public class HttpRequest {
 
     public URI getUri() {
         return uri;
+    }
+
+    public String getCookie(String key) {
+        return cookieMap.get(key);
     }
 }

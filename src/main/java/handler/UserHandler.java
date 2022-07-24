@@ -9,6 +9,9 @@ import webserver.http.HttpResponse;
 import webserver.http.HttpStatus;
 import webserver.was.RequestMapping;
 
+import java.util.List;
+import java.util.stream.IntStream;
+
 public class UserHandler {
 
     @RequestMapping(method = HttpMethod.POST, url = "/user/create")
@@ -35,26 +38,59 @@ public class UserHandler {
 
         User user = DataBase.findUserById(userId);
 
-        HttpHeader header = new HttpHeader();
         String loginFailedViewName = "/user/login_failed.html";
+        String loginSuccessViewName = "/index.html";
 
         if (user == null) {
-            header.add("Set-Cookie", "logined=false");
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.NOT_FOUND, header);
-            httpResponse.setViewName(loginFailedViewName);
-            return httpResponse;
+            return createLoginResponse(HttpStatus.NOT_FOUND, loginFailedViewName, false);
         }
 
         if (!user.isCorrectPassword(password)) {
-            header.add("Set-Cookie", "logined=false");
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED, header);
-            httpResponse.setViewName(loginFailedViewName);
-            return httpResponse;
+            return createLoginResponse(HttpStatus.UNAUTHORIZED, loginFailedViewName, false);
         }
 
-        header.add("Set-Cookie", "logined=true");
-        HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, header);
-        httpResponse.setViewName("/index.html");
-        return httpResponse;
+        return createLoginResponse(HttpStatus.OK, loginSuccessViewName, true);
     };
+
+    private HttpResponse createLoginResponse(HttpStatus status, String viewName, boolean isLoggedIn) {
+        return HttpResponse.builder()
+                .setStatus(status)
+                .setViewName(viewName)
+                .addHeader("Set-Cookie", "logined=" + isLoggedIn)
+                .build();
+    }
+
+    @RequestMapping(method = HttpMethod.GET, url = "/user/list")
+    public final Handler USER_LIST = (request) -> {
+        String logined = request.getCookie("logined");
+
+        if (logined == null || logined.isEmpty() || isFalseString(logined)) {
+            return HttpResponse.builder()
+                    .setStatus(HttpStatus.FOUND)
+                    .addHeader("Location", "/user/login.html")
+                    .build();
+        }
+
+        List<User> allUsers = DataBase.findAll()
+                .stream()
+                .toList();
+
+        List<UserDto> users = convertToUserDtos(allUsers);
+
+        return HttpResponse.builder()
+                .setStatus(HttpStatus.OK)
+                .setViewName("/user/list.html")
+                .putModelAttribute("users", users)
+                .build();
+    };
+
+    private boolean isFalseString(String booleanString) {
+        return !Boolean.parseBoolean(booleanString);
+    }
+
+    private List<UserDto> convertToUserDtos(List<User> allUsers) {
+        return IntStream.range(0, allUsers.size())
+                .mapToObj(i -> UserDto.of(i + 1, allUsers.get(i)))
+                .toList();
+    }
 }

@@ -26,6 +26,7 @@ class UserHandlerTest extends HandlerTest {
 
     private final String USER_CREATE_URI_PATH = "/user/create";
     private final String USER_LOGIN_URI_PATH = "/user/login";
+    private final String USER_LIST_URI_PATH = "/user/list";
 
     @Nested
     @DisplayName("회원가입 요청은")
@@ -101,10 +102,6 @@ class UserHandlerTest extends HandlerTest {
             HttpHeaders headers = response.headers();
             assertThat(headers).isNotNull();
 
-            Optional<String> locationHeader = headers.firstValue("Location");
-            assertThat(locationHeader.isPresent()).isTrue();
-            assertThat(locationHeader.orElseThrow()).isEqualTo("/index.html");
-
             Optional<String> cookies = headers.firstValue("Set-Cookie");
             assertThat(cookies.isPresent()).isTrue();
             assertThat(cookies.orElseThrow()).isEqualTo("logined=true");
@@ -140,10 +137,6 @@ class UserHandlerTest extends HandlerTest {
             HttpHeaders headers = response.headers();
             assertThat(headers).isNotNull();
 
-            Optional<String> locationHeader = headers.firstValue("Location");
-            assertThat(locationHeader.isPresent()).isTrue();
-            assertThat(locationHeader.orElseThrow()).isEqualTo("/user/login_failed.html");
-
             Optional<String> cookies = headers.firstValue("Set-Cookie");
             assertThat(cookies.isPresent()).isTrue();
             assertThat(cookies.orElseThrow()).isEqualTo("logined=false");
@@ -177,13 +170,60 @@ class UserHandlerTest extends HandlerTest {
             HttpHeaders headers = response.headers();
             assertThat(headers).isNotNull();
 
-            Optional<String> locationHeader = headers.firstValue("Location");
-            assertThat(locationHeader.isPresent()).isTrue();
-            assertThat(locationHeader.orElseThrow()).isEqualTo("/user/login_failed.html");
-
             Optional<String> cookies = headers.firstValue("Set-Cookie");
             assertThat(cookies.isPresent()).isTrue();
             assertThat(cookies.orElseThrow()).isEqualTo("logined=false");
+        }
+    }
+
+    @Nested
+    @DisplayName("회원 목록 조회는")
+    class UserListTest {
+
+        @Test
+        void 로그인된_사용자면_성공한다 () throws IOException, InterruptedException {
+            // given
+            String uri = baseUrl + USER_LIST_URI_PATH;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .GET()
+                    .setHeader("Cookie", "logined=true")
+                    .uri(URI.create(uri))
+                    .build();
+
+            HttpClient httpClient = HttpClient.newHttpClient();
+
+            // when
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // then
+            assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.getCode());
+            assertThat(response.body()).isNotNull();
+            assertThat(response.body()).isNotEmpty();
+        }
+
+        @Test
+        void 로그인_안된_사용자면_로그인_페이지로_이동한다() throws IOException, InterruptedException {
+            // given
+            String uri = baseUrl + USER_LIST_URI_PATH;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .GET()
+                    .uri(URI.create(uri))
+                    .build();
+
+            HttpClient httpClient = HttpClient.newHttpClient();
+
+            // when
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // then
+            assertThat(response.statusCode()).isEqualTo(HttpStatus.FOUND.getCode());
+
+            HttpHeaders headers = response.headers();
+            Optional<String> location = headers.firstValue("Location");
+            assertThat(location.isPresent()).isTrue();
+            assertThat(location.get()).isEqualTo("/user/login.html");
         }
     }
 

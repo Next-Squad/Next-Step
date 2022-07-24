@@ -6,21 +6,25 @@ import java.util.Arrays;
 
 public class HttpResponse {
 
-    public static final HttpResponse NOT_FOUNT_RESPONSE = new HttpResponse(HttpStatus.NOT_FOUND, new HttpHeader());
-
     private final HttpStatus status;
     private final HttpHeader header;
+    private final HttpResponseModel model;
     private final byte[] body;
 
     private String viewName;
 
     public HttpResponse(HttpStatus status, HttpHeader header) {
-        this(status, header, new byte[]{});
+        this(status, header, new HttpResponseModel(), new byte[]{});
     }
 
     public HttpResponse(HttpStatus status, HttpHeader header, byte[] body) {
+        this(status, header, new HttpResponseModel(), body);
+    }
+
+    public HttpResponse(HttpStatus status, HttpHeader header, HttpResponseModel model, byte[] body) {
         this.status = status;
         this.header = header.clone();
+        this.model = model.clone();
         this.body = body;
     }
 
@@ -30,6 +34,10 @@ public class HttpResponse {
 
     public HttpHeader getHeader() {
         return header.clone();
+    }
+
+    public HttpResponseModel getModel() {
+        return model.clone();
     }
 
     public byte[] getBody() {
@@ -43,8 +51,6 @@ public class HttpResponse {
     public void setViewName(String viewName) {
         this.viewName = viewName;
 
-        header.add("Location", viewName);
-
         String extension = HttpRequestUtils.parseExtension(viewName);
 
         if (extension != null) {
@@ -55,5 +61,53 @@ public class HttpResponse {
 
     public boolean hasViewName() {
         return this.viewName != null && !this.viewName.isEmpty() && !this.viewName.isBlank();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private HttpStatus status;
+        private final HttpHeader header = new HttpHeader();
+        private final HttpResponseModel model = new HttpResponseModel();
+        private byte[] body = new byte[] {};
+        private String viewName;
+
+        public Builder setStatus(HttpStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder addHeader(String key, String value) {
+            this.header.add(key, value);
+            return this;
+        }
+
+        public Builder putModelAttribute(String key, Object value) {
+            this.model.put(key, value);
+            return this;
+        }
+
+        public Builder setBody(byte[] body) {
+            this.body = body;
+            return this;
+        }
+
+        public Builder setViewName(String viewName) {
+            this.viewName = viewName;
+            return this;
+        }
+
+        public HttpResponse build() {
+            HttpResponse response = new HttpResponse(status, header, body);
+
+            if (model.keySet().size() > 0) {
+                response = new HttpResponse(status, header, model, body);
+            }
+
+            response.setViewName(viewName);
+            return response;
+        }
     }
 }
