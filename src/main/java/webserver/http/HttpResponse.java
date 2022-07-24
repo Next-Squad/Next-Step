@@ -43,8 +43,6 @@ public class HttpResponse {
     public void setViewName(String viewName) {
         this.viewName = viewName;
 
-        header.add("Location", viewName);
-
         String extension = HttpRequestUtils.parseExtension(viewName);
 
         if (extension != null) {
@@ -55,5 +53,47 @@ public class HttpResponse {
 
     public boolean hasViewName() {
         return this.viewName != null && !this.viewName.isEmpty() && !this.viewName.isBlank();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private HttpStatus status;
+        private final HttpHeader header = new HttpHeader();
+        private byte[] body = new byte[] {};
+        private String viewName;
+
+        public Builder setStatus(HttpStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public Builder addHeader(String key, String value) {
+            this.header.add(key, value);
+            return this;
+        }
+
+        public Builder setBody(byte[] body) {
+            this.body = body;
+            return this;
+        }
+
+        public Builder setViewName(String viewName) {
+            this.viewName = viewName;
+            return this;
+        }
+
+        public HttpResponse build() {
+            HttpResponse response = new HttpResponse(status, header);
+
+            if (body.length > 0) {
+                response = new HttpResponse(status, header, body);
+            }
+
+            response.setViewName(viewName);
+            return response;
+        }
     }
 }

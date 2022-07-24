@@ -101,10 +101,6 @@ class UserHandlerTest extends HandlerTest {
             HttpHeaders headers = response.headers();
             assertThat(headers).isNotNull();
 
-            Optional<String> locationHeader = headers.firstValue("Location");
-            assertThat(locationHeader.isPresent()).isTrue();
-            assertThat(locationHeader.orElseThrow()).isEqualTo("/index.html");
-
             Optional<String> cookies = headers.firstValue("Set-Cookie");
             assertThat(cookies.isPresent()).isTrue();
             assertThat(cookies.orElseThrow()).isEqualTo("logined=true");
@@ -140,10 +136,6 @@ class UserHandlerTest extends HandlerTest {
             HttpHeaders headers = response.headers();
             assertThat(headers).isNotNull();
 
-            Optional<String> locationHeader = headers.firstValue("Location");
-            assertThat(locationHeader.isPresent()).isTrue();
-            assertThat(locationHeader.orElseThrow()).isEqualTo("/user/login_failed.html");
-
             Optional<String> cookies = headers.firstValue("Set-Cookie");
             assertThat(cookies.isPresent()).isTrue();
             assertThat(cookies.orElseThrow()).isEqualTo("logined=false");
@@ -176,10 +168,6 @@ class UserHandlerTest extends HandlerTest {
 
             HttpHeaders headers = response.headers();
             assertThat(headers).isNotNull();
-
-            Optional<String> locationHeader = headers.firstValue("Location");
-            assertThat(locationHeader.isPresent()).isTrue();
-            assertThat(locationHeader.orElseThrow()).isEqualTo("/user/login_failed.html");
 
             Optional<String> cookies = headers.firstValue("Set-Cookie");
             assertThat(cookies.isPresent()).isTrue();
