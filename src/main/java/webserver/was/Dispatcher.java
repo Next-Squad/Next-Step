@@ -32,7 +32,7 @@ public class Dispatcher {
         HttpResponse response = handler.handle(request);
 
         if (response.hasViewName()) {
-            byte[] view = viewResolver.resolveView(response.getViewName());
+            byte[] view = viewResolver.resolveView(response.getViewName(), response.getModel());
 
             return new HttpResponse(response.getStatus(), response.getHeader(), view);
         }
