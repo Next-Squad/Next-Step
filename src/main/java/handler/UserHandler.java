@@ -66,8 +66,8 @@ public class UserHandler {
 
         if (logined == null || logined.isEmpty() || isFalseString(logined)) {
             return HttpResponse.builder()
-                    .setStatus(HttpStatus.UNAUTHORIZED)
-                    .setViewName("/index.html")
+                    .setStatus(HttpStatus.FOUND)
+                    .addHeader("Location", "/user/login.html")
                     .build();
         }
 
