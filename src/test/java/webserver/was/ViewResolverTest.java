@@ -42,10 +42,6 @@ class ViewResolverTest {
         // when
         byte[] bytes = viewResolver.resolveView("/viewResolverTest.html", model);
 
-        System.out.println(new String(bytes));
-        System.out.println("------------");
-        System.out.println(new String(expectedFile));
-
         // then
         assertThat(bytes).isEqualTo(expectedFile);
     }
