@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 public enum ContentType {
     TEXT_PLAIN("text/plain", "txt"),
-    TEXT_HTML("text/html", "html");
+    TEXT_HTML("text/html", "html"),
+    TEXT_CSS("text/css", "css");
 
     private static final ContentType DEFAULT = TEXT_PLAIN;
 
