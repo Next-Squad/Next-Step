@@ -1,5 +1,9 @@
 package dispatcher;
 
+import webserver.Request.Request;
+import webserver.Response.Response;
+
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class HandlerMethod {
@@ -18,5 +22,9 @@ public class HandlerMethod {
 
     public Method getMethod() {
         return method;
+    }
+
+    public Response invoke(Request request, Response response) throws InvocationTargetException, IllegalAccessException {
+        return (Response) method.invoke(bean, request, response);
     }
 }

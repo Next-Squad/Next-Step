@@ -2,18 +2,10 @@ package webserver;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Map;
 
 import dispatcher.*;
-import handler.Handler;
-import handler.HomeHandler;
-import handler.LoginHandler;
-import handler.UserHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import service.LoginService;
-import service.UserService;
-import webserver.Request.HttpMethod;
 
 public class WebServer {
     private static final Logger log = LoggerFactory.getLogger(WebServer.class);
@@ -26,17 +18,12 @@ public class WebServer {
         } else {
             port = Integer.parseInt(args[0]);
         }
-        UserService userService = new UserService();
-        Map<RequestMappingInfo, Handler> handlerMap = Map.of(
-                new RequestMappingInfo(HttpMethod.POST, "/user/create"), new UserHandler(userService),
-                new RequestMappingInfo(HttpMethod.GET, "/"), new HomeHandler(),
-                new RequestMappingInfo(HttpMethod.POST, "/user/login"), new LoginHandler(new LoginService(), userService)
-        );
 
-        HandlerMapping handlerMapping = new HandlerMapping(handlerMap);
-
-        FrontController frontController = new FrontController(handlerMapping);
-        Dispatcher dispatcher = new Dispatcher(frontController, new ResourceHandler());
+        BeanMaker beanMaker = new BeanMaker();
+        beanMaker.readComponents();
+        HandlerMappingV2 handlerMappingV2 = beanMaker.getHandlerMappingV2();
+        FrontControllerV2 frontControllerV2 = new FrontControllerV2(handlerMappingV2);
+        Dispatcher dispatcher = new Dispatcher(frontControllerV2, new ResourceHandler());
 
         // 서버소켓을 생성한다. 웹서버는 기본적으로 8080번 포트를 사용한다.
 

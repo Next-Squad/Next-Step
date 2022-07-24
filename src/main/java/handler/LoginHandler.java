@@ -10,7 +10,6 @@ import webserver.Request.RequestParams;
 import webserver.Response.HttpStatus;
 import webserver.Response.Response;
 
-@Component
 public class LoginHandler implements Handler {
 
     private final LoginService loginService;
