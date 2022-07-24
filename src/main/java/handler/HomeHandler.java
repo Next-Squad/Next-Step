@@ -5,6 +5,7 @@ import webserver.ContentType;
 import webserver.Request.Request;
 import webserver.Response.Response;
 
+@Component
 public class HomeHandler implements Handler{
 
     @Override

@@ -5,6 +5,7 @@ import webserver.Request.Request;
 import webserver.Request.RequestParams;
 import webserver.Response.Response;
 
+@Component
 public class UserHandler implements Handler {
 
     private final UserService userService;

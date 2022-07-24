@@ -1,12 +1,17 @@
 package reflection;
 
+import com.google.common.reflect.ClassPath;
+import handler.Component;
 import org.junit.jupiter.api.Test;
 import service.UserService;
 import webserver.Request.HttpMethod;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -71,5 +76,19 @@ class ReflectionPracticeTest {
                 .orElseThrow(IllegalArgumentException::new);
 
         assertThat(method.getName()).isEqualTo("plus");
+    }
+
+    @Test
+    void guava_getClass_test() throws IOException {
+        Set<Class<?>> classes = ClassPath.from(ClassLoader.getSystemClassLoader())
+                .getAllClasses()
+                .stream()
+                .filter(clazz -> clazz.getPackageName().equalsIgnoreCase("reflection"))
+                .map(clazz -> clazz.load())
+                .filter(clazz -> clazz.isAnnotationPresent(Component.class))
+                .collect(Collectors.toSet());
+
+        assertThat(classes.contains(ComponentA.class)).isTrue();
+        assertThat(classes.contains(ComponentB.class)).isTrue();
     }
 }
