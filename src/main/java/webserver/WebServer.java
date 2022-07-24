@@ -27,10 +27,10 @@ public class WebServer {
             port = Integer.parseInt(args[0]);
         }
         UserService userService = new UserService();
-        Map<MappingRegistry, Handler> handlerMap = Map.of(
-                new MappingRegistry(HttpMethod.POST, "/user/create"), new UserHandler(userService),
-                new MappingRegistry(HttpMethod.GET, "/"), new HomeHandler(),
-                new MappingRegistry(HttpMethod.POST, "/user/login"), new LoginHandler(new LoginService(), userService)
+        Map<RequestMappingInfo, Handler> handlerMap = Map.of(
+                new RequestMappingInfo(HttpMethod.POST, "/user/create"), new UserHandler(userService),
+                new RequestMappingInfo(HttpMethod.GET, "/"), new HomeHandler(),
+                new RequestMappingInfo(HttpMethod.POST, "/user/login"), new LoginHandler(new LoginService(), userService)
         );
 
         HandlerMapping handlerMapping = new HandlerMapping(handlerMap);
