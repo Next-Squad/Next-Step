@@ -51,6 +51,9 @@ public class RequestHandler extends Thread {
                     cookies = HttpRequestUtils.parseCookies(line);
                     log.debug("쿠키: {}", cookies);
                 }
+                if(line.contains("Accept: text/css")){
+                    responseCss(out, url);
+                }
                 log.debug("header: {}", line);
             }
 
@@ -130,6 +133,15 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }private void responseCss200Header(DataOutputStream dos, int lengthOfBodyContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
     }
 
     private void responseLogin302Header(DataOutputStream dos, String cookie, String url) {
@@ -166,6 +178,13 @@ public class RequestHandler extends Thread {
         DataOutputStream dos = new DataOutputStream(out);
         byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
         response200Header(dos, body.length);
+        responseBody(dos, body);
+    }
+
+    private void responseCss(OutputStream out, String url) throws IOException {
+        DataOutputStream dos = new DataOutputStream(out);
+        byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+        responseCss200Header(dos, body.length);
         responseBody(dos, body);
     }
 
