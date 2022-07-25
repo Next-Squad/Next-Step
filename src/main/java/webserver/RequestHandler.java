@@ -2,6 +2,7 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
@@ -58,7 +59,9 @@ public class RequestHandler extends Thread {
             }
 
             if (url.startsWith("/user/create")){
-                String body = IOUtils.readData(br, contentLength);
+
+                String body = URLDecoder.decode(IOUtils.readData(br, contentLength), StandardCharsets.UTF_8);
+                log.debug("바디: {}", body);
                 Map<String, String> params = HttpRequestUtils.parseQueryString(body);
                 User user = new User(params.get("userId"), params.get("password"), params.get("name"),
                         params.get("email"));
@@ -91,7 +94,6 @@ public class RequestHandler extends Thread {
                 }
 
             } else if (url.equals("/user/list")){
-                //TODO: 한글 깨짐 해결하기
                 if (cookies.get("logined").equals("true")) {
                     log.debug("쿠키확인: {}" , cookies.get("logined"));
                     Collection<User> users = DataBase.findAll();
@@ -101,9 +103,10 @@ public class RequestHandler extends Thread {
                     sb.append("<tbody>");
                     for (User u : users) {
                         sb.append("<tr>");
-                        sb.append("<td>" + u.getUserId() + "<td>");
-                        sb.append("<td>" + u.getName() + "<td>");
-                        sb.append("<td>" + u.getEmail() + "<td>");
+                        sb.append("<td>#</td>");
+                        sb.append("<td>" + u.getUserId() + "</td>");
+                        sb.append("<td>" + u.getName() + "</td>");
+                        sb.append("<td>" + u.getEmail() + "</td>");
                         sb.append("</tr>");
                     }
                     sb.append("</tbody>");
