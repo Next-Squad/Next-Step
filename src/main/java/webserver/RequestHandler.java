@@ -2,6 +2,7 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
@@ -51,11 +52,16 @@ public class RequestHandler extends Thread {
                     cookies = HttpRequestUtils.parseCookies(line);
                     log.debug("쿠키: {}", cookies);
                 }
+                if(line.contains("Accept: text/css")){
+                    responseCss(out, url);
+                }
                 log.debug("header: {}", line);
             }
 
             if (url.startsWith("/user/create")){
-                String body = IOUtils.readData(br, contentLength);
+
+                String body = URLDecoder.decode(IOUtils.readData(br, contentLength), StandardCharsets.UTF_8);
+                log.debug("바디: {}", body);
                 Map<String, String> params = HttpRequestUtils.parseQueryString(body);
                 User user = new User(params.get("userId"), params.get("password"), params.get("name"),
                         params.get("email"));
@@ -88,7 +94,6 @@ public class RequestHandler extends Thread {
                 }
 
             } else if (url.equals("/user/list")){
-                //TODO: 한글 깨짐 해결하기
                 if (cookies.get("logined").equals("true")) {
                     log.debug("쿠키확인: {}" , cookies.get("logined"));
                     Collection<User> users = DataBase.findAll();
@@ -98,9 +103,10 @@ public class RequestHandler extends Thread {
                     sb.append("<tbody>");
                     for (User u : users) {
                         sb.append("<tr>");
-                        sb.append("<td>" + u.getUserId() + "<td>");
-                        sb.append("<td>" + u.getName() + "<td>");
-                        sb.append("<td>" + u.getEmail() + "<td>");
+                        sb.append("<td>#</td>");
+                        sb.append("<td>" + u.getUserId() + "</td>");
+                        sb.append("<td>" + u.getName() + "</td>");
+                        sb.append("<td>" + u.getEmail() + "</td>");
                         sb.append("</tr>");
                     }
                     sb.append("</tbody>");
@@ -125,6 +131,15 @@ public class RequestHandler extends Thread {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }private void responseCss200Header(DataOutputStream dos, int lengthOfBodyContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
@@ -166,6 +181,13 @@ public class RequestHandler extends Thread {
         DataOutputStream dos = new DataOutputStream(out);
         byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
         response200Header(dos, body.length);
+        responseBody(dos, body);
+    }
+
+    private void responseCss(OutputStream out, String url) throws IOException {
+        DataOutputStream dos = new DataOutputStream(out);
+        byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+        responseCss200Header(dos, body.length);
         responseBody(dos, body);
     }
 
