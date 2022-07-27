@@ -23,7 +23,6 @@ public class RequestHandler extends Thread {
 
     private final Socket connection;
     private static final String CREATE_USER_PATH = "/user/create";
-    private static final String QUERY_SIGN = "?";
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -35,14 +34,14 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            InputStreamReader inReader = new InputStreamReader(in);
-            BufferedReader br = new BufferedReader(inReader);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
-            String line = br.readLine(); // request line 따로 입력 받음
+            // Request Line
+            String line = br.readLine();
             log.debug("request line: {}", line);
-            String[] tokens = line.split(" "); // request line split
-            int contentLength = 0;
+            String[] tokens = line.split(" ");
 
+            int contentLength = 0;
             while (!line.equals("")) {
                 log.debug("header: {}", line);
                 line = br.readLine();
@@ -51,13 +50,11 @@ public class RequestHandler extends Thread {
                     contentLength = Integer.parseInt(headerTokens[1].trim());
                 }
             }
-            log.debug("int 형식의 contentLength: {}", contentLength);
 
             String url = tokens[1];
             if (CREATE_USER_PATH.equals(url)) {
                 String body = IOUtils.readData(br, contentLength);
                 String decode = URLDecoder.decode(body);
-                log.debug("String으로 변환된 contentLength: {}", decode);
                 Map<String, String> params = HttpRequestUtils.parseQueryString(decode);
 
                 User user = new User(
@@ -66,6 +63,8 @@ public class RequestHandler extends Thread {
                     params.get("name"),
                     params.get("email"));
                 log.debug("user: {}", user);
+                DataOutputStream dos = new DataOutputStream(out);
+                response302Header(dos, "/index.html");
                 DataBase.addUser(user);
             }
 
@@ -79,13 +78,21 @@ public class RequestHandler extends Thread {
         }
     }
 
-
-
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302Header(DataOutputStream dos, String url) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Location: " + url + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
