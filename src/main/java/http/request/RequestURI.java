@@ -33,7 +33,7 @@ public class RequestURI {
 	@Override
 	public String toString() {
 		if (queryString != null) {
-			return path + queryString;
+			return path + "?" + queryString;
 		}
 		return path;
 	}

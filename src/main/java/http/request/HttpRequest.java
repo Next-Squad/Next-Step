@@ -27,19 +27,16 @@ public class HttpRequest {
 	}
 
 	public static HttpRequest from(InputStream in) throws IOException {
-		InputStreamReader inputStreamReader = new InputStreamReader(in, StandardCharsets.UTF_8); // 왜 안먹힐까?
-		BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-		String line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8); // 왜 한 번 더 해줘야 먹힐까? - 위에서 안먹히는 걸까?
-
-		RequestLine requestLine = HttpRequestUtils.parseRequestLine(line);
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+		String line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8);
+		RequestLine requestLine = RequestLine.from(line);
 		RequestHeaders requestHeaders = new RequestHeaders();
 		while (!line.equals((""))) {
 			line = URLDecoder.decode(bufferedReader.readLine(), StandardCharsets.UTF_8);
-			Pair pair = HttpRequestUtils.parseHeader(line);
-			requestHeaders.addHeader(pair);
+			requestHeaders.addHeader(line);
 		}
-		if (requestHeaders.containsKey("Content-Length")) {
-			int contentLength = Integer.parseInt(requestHeaders.getHeader("Content-Length"));
+		if (requestHeaders.hasContentLength()) {
+			int contentLength = Integer.parseInt(requestHeaders.getContentLength());
 			String messageBody = URLDecoder.decode(
 				IOUtils.readData(bufferedReader, contentLength),
 				StandardCharsets.UTF_8

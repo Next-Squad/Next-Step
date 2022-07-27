@@ -1,6 +1,7 @@
 package http.request;
 
 import http.HttpVersion;
+import util.HttpRequestUtils;
 
 public class RequestLine {
 
@@ -14,7 +15,8 @@ public class RequestLine {
 		this.httpVersion = httpVersion;
 	}
 
-	public static RequestLine from(String[] tokens) {
+	public static RequestLine from(String line) {
+		String[] tokens = HttpRequestUtils.parseRequestLine(line);
 		HttpMethod httpMethod = HttpMethod.valueOf(tokens[0]);
 		RequestURI requestURI = RequestURI.from(tokens[1]);
 		HttpVersion httpVersion = new HttpVersion(tokens[2]);
