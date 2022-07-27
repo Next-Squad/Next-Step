@@ -6,9 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import util.HttpRequestUtils;
-import util.HttpRequestUtils.Pair;
-import util.IOUtils;
 
 public class HttpRequest {
 
@@ -36,12 +33,8 @@ public class HttpRequest {
 			requestHeaders.addHeader(line);
 		}
 		if (requestHeaders.hasContentLength()) {
-			int contentLength = Integer.parseInt(requestHeaders.getContentLength());
-			String messageBody = URLDecoder.decode(
-				IOUtils.readData(bufferedReader, contentLength),
-				StandardCharsets.UTF_8
-			);
-			RequestMessageBody requestMessageBody = new RequestMessageBody(messageBody);
+			RequestMessageBody requestMessageBody = RequestMessageBody
+				.from(bufferedReader, requestHeaders.getContentLength());
 			return new HttpRequest(requestLine, requestHeaders, requestMessageBody);
 		}
 		return new HttpRequest(requestLine, requestHeaders);

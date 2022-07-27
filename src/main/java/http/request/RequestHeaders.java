@@ -13,7 +13,7 @@ public class RequestHeaders {
 	private final Map<String, String> headers = new HashMap<>();
 
 	public void addHeader(String line) {
-		if (line == null) {
+		if (line.isEmpty() || line.isBlank()) {
 			return;
 		}
 		Pair pair = HttpRequestUtils.parseHeader(line);
@@ -28,18 +28,15 @@ public class RequestHeaders {
 		return headers.containsKey(CONTENT_LENGTH);
 	}
 
-	public boolean containsKey(String key) {
-		return headers.containsKey(key);
+	public int getContentLength() {
+		return Integer.parseInt(headers.get(CONTENT_LENGTH));
 	}
 
-	public String getContentLength() {
-		return headers.get(CONTENT_LENGTH);
+	public boolean hasCookie() {
+		return headers.containsKey(COOKIE);
 	}
 
 	public String getCookie() {
-		if (headers.containsKey(COOKIE)) {
-			return headers.get(COOKIE);
-		}
-		return null;
+		return headers.get(COOKIE);
 	}
 }

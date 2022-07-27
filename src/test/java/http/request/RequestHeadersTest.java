@@ -18,7 +18,7 @@ class RequestHeadersTest {
 		class Context_with_String {
 
 			@Test
-			@DisplayName("headers에 값을 key, value로 넣는다.")
+			@DisplayName("headers에 값을 key, value로 넣는다")
 			void it_puts_in_headers() {
 
 				RequestHeaders requestHeaders = new RequestHeaders();
