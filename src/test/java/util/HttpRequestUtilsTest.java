@@ -2,6 +2,10 @@ package util;
 
 import static org.assertj.core.api.Assertions.*;
 
+import http.request.HttpMethod;
+import http.HttpVersion;
+import http.request.RequestLine;
+import http.request.RequestURI;
 import java.util.Map;
 
 
@@ -9,6 +13,19 @@ import org.junit.jupiter.api.Test;
 import util.HttpRequestUtils.Pair;
 
 public class HttpRequestUtilsTest {
+
+    @Test
+    void RequestLine을_파싱하여_분류할_수_있다() {
+        String line ="GET /index.html HTTP/1.1";
+        RequestLine requestLine = HttpRequestUtils.parseRequestLine(line);
+        RequestURI requestUri = requestLine.getRequestUri();
+        HttpVersion httpVersion = requestLine.getHttpVersion();
+
+        assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(requestUri.getPath()).isEqualTo("/index.html");
+        assertThat(httpVersion.getVersion()).isEqualTo("HTTP/1.1");
+    }
+
     @Test
     public void parseQueryString() {
         String queryString = "userId=javajigi";

@@ -2,6 +2,18 @@ plugins {
     id 'java'
 }
 
+jar {
+    manifest {
+        attributes('Main-Class': 'webserver.WebServer')
+    }
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 group 'org.example'
 version '1.0-SNAPSHOT'
 
@@ -10,8 +22,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.22.0'
 
     // https://mvnrepository.com/artifact/com.google.guava/guava
@@ -27,3 +39,10 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+task stage(dependsOn: ['build', 'clean'])
+build.mustRunAfter clean
