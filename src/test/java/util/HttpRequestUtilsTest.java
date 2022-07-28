@@ -17,7 +17,7 @@ public class HttpRequestUtilsTest {
     @Test
     void RequestLine을_파싱하여_분류할_수_있다() {
         String line ="GET /index.html HTTP/1.1";
-        RequestLine requestLine = HttpRequestUtils.parseRequestLine(line);
+        RequestLine requestLine = RequestLine.from(line);
         RequestURI requestUri = requestLine.getRequestUri();
         HttpVersion httpVersion = requestLine.getHttpVersion();
 

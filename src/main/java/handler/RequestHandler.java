@@ -38,6 +38,7 @@ public class RequestHandler extends Thread {
             RequestLine requestLine = httpRequest.getRequestLine();
             log.info("RequestLine= {}", requestLine);
             RequestURI requestUri = requestLine.getRequestUri();
+            log.info("RequestURI= {}", requestUri);
             String url = requestUri.getPath();
 
             if (requestLine.getHttpMethod().equals(HttpMethod.GET)) {
@@ -49,14 +50,15 @@ public class RequestHandler extends Thread {
                     RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
                     String cookies = requestHeaders.getCookie();
                     log.debug("Cookie= {}", cookies);
-                    if (cookies == null) {
+                    if (!requestHeaders.hasCookie()) {
                         httpResponse = HttpResponse.ok("/user/login.html");
                     }
 
-                    if (cookies != null) {
+                    if (requestHeaders.hasCookie()) {
                         Map<String, String> parseCookies = HttpRequestUtils.parseCookies(cookies);
                         if (parseCookies.get("logined").equals("false")) {
                             httpResponse = HttpResponse.ok("/user/login.html");
+                            httpResponse.flush(out);
                         }
                         httpResponse = HttpResponse.ok("/user/list.html", UserDataBase.findAll());
                     }
