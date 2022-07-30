@@ -106,16 +106,6 @@ public class HttpResponse {
 		return new HttpResponse(statusLine, responseHeaders);
 	}
 
-	public static HttpResponse notHTML(String extension, String viewName) throws IOException {
-		byte[] messageBody = Files.readAllBytes(new File("./webapp/" + viewName).toPath());
-		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
-		ResponseHeaders responseHeaders = new ResponseHeaders();
-		responseHeaders.setAccept("text/"+extension+", */*; q=0.1");
-		responseHeaders.setContentLength(messageBody.length);
-		ResponseMessageBody responseMessageBody = new ResponseMessageBody(messageBody);
-		return new HttpResponse(statusLine, responseHeaders, responseMessageBody);
-	}
-
 	public void flush(OutputStream out) throws IOException {
 		DataOutputStream dos = new DataOutputStream(out);
 		dos.writeBytes(statusLine.toString() + " \r\n");
