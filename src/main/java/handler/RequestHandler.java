@@ -2,6 +2,7 @@ package handler;
 
 import db.URLDataBase;
 import db.UserDataBase;
+import http.MimeType;
 import http.request.HttpMethod;
 import http.request.HttpRequest;
 import http.request.RequestHeaders;
@@ -42,8 +43,7 @@ public class RequestHandler extends Thread {
             String url = requestUri.getPath();
 
             if (requestLine.getHttpMethod().equals(HttpMethod.GET)) {
-                if (URLDataBase.contains(url) || url.contains(".css") || url.contains(".js")
-                    || url.contains(".woff") || url.contains(".ico")) {
+                if (URLDataBase.contains(url) || MimeType.isSupportedExtension(url)) {
                     httpResponse = HttpResponse.ok(url);
                 }
                 if (url.equals("/user/list")) {
