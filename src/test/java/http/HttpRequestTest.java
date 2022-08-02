@@ -19,4 +19,16 @@ public class HttpRequestTest {
         assertThat("javajigi").isEqualTo(request.getParameter("userId"));
 
     }
+
+    @Test
+    public void request_POST() throws Exception{
+        InputStream in = new FileInputStream(new File(testDirectory + "Http_POST.txt"));
+        HttpRequest request = new HttpRequest(in);
+
+        assertThat("POST").isEqualTo(request.getMethod());
+        assertThat("/user/create").isEqualTo(request.getPath());
+        assertThat("keep-alive").isEqualTo(request.getHeader("Connection"));
+        assertThat("javajigi").isEqualTo(request.getParameter("userId"));
+
+    }
 }
