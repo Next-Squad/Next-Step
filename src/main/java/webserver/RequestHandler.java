@@ -12,17 +12,30 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.Map;
+import login.LoginService;
+import login.dto.LoginResult;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
 import util.IOUtils;
 
+/**
+ * "로그인" 메뉴를 클릭하면 http://localhost:8080/user/login.html 로 이동해 로그인한다
+ * 로그인에 성공하면 index.html로 이동
+ * 로그인이 성공하면 쿠키를 활용해 로그인 상태를 유지할 수 있어야한다
+ * 로그인을 성공할 경우 Request Header의 Cookie 헤더 값이 logined=true
+ * 로그인이 실패하면 /user/login_failed.html로 이동
+ * 로그인이 실패하면 Cookie 헤더 값이 logined=false로 전달
+ */
+
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
     private static final String CREATE_USER_PATH = "/user/create";
+    private LoginService loginService = new LoginService();
+
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
@@ -53,9 +66,7 @@ public class RequestHandler extends Thread {
 
             String url = tokens[1];
             if (CREATE_USER_PATH.equals(url)) {
-                String body = IOUtils.readData(br, contentLength);
-                String decode = URLDecoder.decode(body);
-                Map<String, String> params = HttpRequestUtils.parseQueryString(decode);
+                Map<String, String> params = getParams(br, contentLength);
 
                 User user = new User(
                     params.get("userId"),
@@ -68,6 +79,15 @@ public class RequestHandler extends Thread {
                 DataBase.addUser(user);
             }
 
+            // login logic
+            if ("/user/login".equals(url)) {
+                Map<String, String> params = getParams(br, contentLength);
+                LoginResult result = loginService.login(params.get("userId"),
+                    params.get("password"));
+                DataOutputStream dataOutputStream = new DataOutputStream(out);
+                response302HeaderWithLoginResult(dataOutputStream, result.getUrl(), result.isLogined());
+            }
+
             log.debug("line: {}", line);
             byte[] body = Files.readAllBytes(new File("./webapp" + tokens[1]).toPath());
             DataOutputStream dos = new DataOutputStream(out);
@@ -76,6 +96,13 @@ public class RequestHandler extends Thread {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+    }
+
+    private Map<String, String> getParams(BufferedReader br, int contentLength) throws IOException {
+        String body = IOUtils.readData(br, contentLength);
+        String decode = URLDecoder.decode(body);
+        Map<String, String> params = HttpRequestUtils.parseQueryString(decode);
+        return params;
     }
 
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
@@ -93,6 +120,17 @@ public class RequestHandler extends Thread {
         try {
             dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
             dos.writeBytes("Location: " + url + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302HeaderWithLoginResult(DataOutputStream dos, String url, boolean isLogined) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
+            dos.writeBytes("Location: " + url + "\r\n");
+            dos.writeBytes("Cookie: " + "logined=" + isLogined + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
