@@ -20,21 +20,12 @@ import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
 import util.IOUtils;
 
-/**
- * "로그인" 메뉴를 클릭하면 http://localhost:8080/user/login.html 로 이동해 로그인한다
- * 로그인에 성공하면 index.html로 이동
- * 로그인이 성공하면 쿠키를 활용해 로그인 상태를 유지할 수 있어야한다
- * 로그인을 성공할 경우 Request Header의 Cookie 헤더 값이 logined=true
- * 로그인이 실패하면 /user/login_failed.html로 이동
- * 로그인이 실패하면 Cookie 헤더 값이 logined=false로 전달
- */
-
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
     private static final String CREATE_USER_PATH = "/user/create";
-    private LoginService loginService = new LoginService();
+    private LoginService loginService = LoginService.getInstance();
 
 
     public RequestHandler(Socket connectionSocket) {
