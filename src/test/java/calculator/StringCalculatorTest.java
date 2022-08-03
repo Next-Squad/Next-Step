@@ -18,37 +18,52 @@ class StringCalculatorTest {
     @Test
     void add() {
         String text = "1,2,3";
+
         int result = cal.add(text);
+
         assertThat(result).isEqualTo(6);
     }
 
     @Test
     void add2() {
         String text = "1:2,3";
+
         int result = cal.add(text);
+
         assertThat(result).isEqualTo(6);
     }
 
     @Test
     void addCustomDelimiter() {
         String text = "//;\n1;2;3";
+
         int result = cal.add(text);
+
         assertThat(result).isEqualTo(6);
     }
 
     @Test
     void addException() {
         String text = "1:2,-3";
+
         assertThrows(RuntimeException.class, () -> cal.add(text));
     }
 
     @Test
     void emptyString() {
-        String text = null;
-        String text2 = "";
+        String text = "";
+
         int result = cal.add(text);
-        int result2 = cal.add(text2);
+
         assertThat(result).isZero();
-        assertThat(result2).isZero();
+    }
+
+    @Test
+    void nullValue() {
+        String text = null;
+
+        int result = cal.add(text);
+
+        assertThat(result).isZero();
     }
 }
