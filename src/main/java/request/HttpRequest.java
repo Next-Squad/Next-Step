@@ -20,12 +20,12 @@ public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private final BufferedReader bufferedReader;
-    private String method;
-    private String url;
-    private String protocol;
-    private Map<String, String> header;
-    private Map<String, String> body;
-    private Cookie cookie;
+    private final String method;
+    private final String url;
+    private final String protocol;
+    private final Map<String, String> header;
+    private final Map<String, String> body;
+    private final Cookie cookie;
 
     public HttpRequest(InputStream in) throws IOException {
         this.bufferedReader = new BufferedReader(new InputStreamReader(in));
@@ -51,8 +51,7 @@ public class HttpRequest {
 
     private Map<String, String> parseBody() throws IOException {
         int contentLength = getContentLength();
-        Map<String, String> body = getBodyData(contentLength);
-        return body;
+        return getBodyData(contentLength);
     }
 
     private Cookie parseCookie() {
@@ -67,7 +66,7 @@ public class HttpRequest {
     }
 
     private int getContentLength() {
-        if (header.get("Content-Length").contains("Content-Length")) {
+        if (header.containsKey("Content-Length")) {
             return Integer.parseInt(header.get("Content-Length"));
         }
         return 0;

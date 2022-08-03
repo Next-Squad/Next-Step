@@ -14,4 +14,8 @@ public class Cookie {
     public String toString() {
         return isLogined + " " + path;
     }
+
+    public String getIsLogined() {
+        return isLogined;
+    }
 }
