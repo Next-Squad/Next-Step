@@ -46,12 +46,18 @@ public class RequestHandler extends Thread {
             String[] tokens = line.split(" ");
 
             int contentLength = 0;
+            String cookie = "";
             while (!line.equals("")) {
                 log.debug("header: {}", line);
                 line = br.readLine();
                 if (line.contains("Content-Length")) {
                     String[] headerTokens = line.split(":");
                     contentLength = Integer.parseInt(headerTokens[1].trim());
+                }
+
+                if (line.contains("Cookie")) {
+                    String[] headerTokens = line.split(":");
+                    cookie = headerTokens[1].trim();
                 }
             }
 
@@ -68,6 +74,7 @@ public class RequestHandler extends Thread {
                 DataOutputStream dos = new DataOutputStream(out);
                 response302Header(dos, "/index.html");
                 DataBase.addUser(user);
+                return;
             }
 
             // login logic
@@ -77,6 +84,23 @@ public class RequestHandler extends Thread {
                     params.get("password"));
                 DataOutputStream dataOutputStream = new DataOutputStream(out);
                 response302HeaderWithLoginResult(dataOutputStream, result.getUrl(), result.isLogined());
+                return;
+            }
+
+            // user list logic
+            if ("/user/list".equals(url)) {
+                if (!cookie.isEmpty()) {
+                    String[] split = cookie.split("=");
+                    String loginStatus = split[1];
+                    if (loginStatus.equals("true")) {
+                        DataOutputStream dataOutputStream = new DataOutputStream(out);
+                        response302Header(dataOutputStream, "/user/list.html");
+                    }
+                } else {
+                    DataOutputStream dataOutputStream = new DataOutputStream(out);
+                    response302Header(dataOutputStream, "login.html");
+                }
+                return;
             }
 
             log.debug("line: {}", line);
@@ -121,7 +145,7 @@ public class RequestHandler extends Thread {
         try {
             dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
             dos.writeBytes("Location: " + url + "\r\n");
-            dos.writeBytes("Cookie: " + "logined=" + isLogined + "\r\n");
+            dos.writeBytes("Set-Cookie: " + "logined=" + isLogined + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
