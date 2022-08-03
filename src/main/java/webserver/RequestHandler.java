@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.Map;
 import login.LoginService;
@@ -17,8 +16,7 @@ import login.dto.LoginResult;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.HttpRequestUtils;
-import util.IOUtils;
+import request.HttpRequest;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -38,28 +36,8 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            HttpRequest httpRequest = new HttpRequest(in);
 
-            // Request Line
-            String line = br.readLine();
-            log.debug("request line: {}", line);
-            String[] tokens = line.split(" ");
-
-            int contentLength = 0;
-            String cookie = "";
-            while (!line.equals("")) {
-                log.debug("header: {}", line);
-                line = br.readLine();
-                if (line.contains("Content-Length")) {
-                    String[] headerTokens = line.split(":");
-                    contentLength = Integer.parseInt(headerTokens[1].trim());
-                }
-
-                if (line.contains("Cookie")) {
-                    String[] headerTokens = line.split(":");
-                    cookie = headerTokens[1].trim();
-                }
-            }
 
             String url = tokens[1];
             if (CREATE_USER_PATH.equals(url)) {
@@ -113,13 +91,6 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private Map<String, String> getParams(BufferedReader br, int contentLength) throws IOException {
-        String body = IOUtils.readData(br, contentLength);
-        String decode = URLDecoder.decode(body);
-        Map<String, String> params = HttpRequestUtils.parseQueryString(decode);
-        return params;
-    }
-
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
@@ -145,7 +116,7 @@ public class RequestHandler extends Thread {
         try {
             dos.writeBytes("HTTP/1.1 302 FOUND \r\n");
             dos.writeBytes("Location: " + url + "\r\n");
-            dos.writeBytes("Set-Cookie: " + "logined=" + isLogined + "\r\n");
+            dos.writeBytes("Set-Cookie: " + "logined=" + isLogined + "Path=/;" + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
