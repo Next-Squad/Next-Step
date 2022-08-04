@@ -12,9 +12,7 @@ public class HomeController extends AbstractController{
 
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-		RequestLine requestLine = request.getRequestLine();
-		RequestURI requestURI = requestLine.getRequestUri();
-		String url = requestURI.getPath();
+		String url = request.getRequestURIPath();
 		if (URLDataBase.contains(url) || MimeType.isSupportedExtension(url)) {
 			response.ok(url);
 			return;
