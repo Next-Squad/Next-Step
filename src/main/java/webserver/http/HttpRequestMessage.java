@@ -1,5 +1,7 @@
 package webserver.http;
 
+import static webserver.http.HttpHeader.CONTENT_LENGTH;
+
 import util.HttpRequestUtils;
 import util.IOUtils;
 
@@ -11,7 +13,7 @@ import java.net.URI;
 
 public record HttpRequestMessage(HttpMethod method, URI uri, HttpHeader header, HttpRequestBody body) {
 
-    private static final String CONTENT_LENGTH = "Content-Length";
+
     private static final String SP = " ";
     private static final int METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
