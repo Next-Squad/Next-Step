@@ -11,24 +11,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 
-public record HttpRequestMessage(HttpMethod method, URI uri, HttpHeader header, HttpRequestBody body) {
-
-
-    private static final String SP = " ";
-    private static final int METHOD_INDEX = 0;
-    private static final int URI_INDEX = 1;
+public record HttpRequestMessage(HttpRequestLine requestLine, HttpHeader header, HttpRequestBody body) {
 
     public static HttpRequestMessage parse(InputStream in) throws IOException, IllegalArgumentException, IndexOutOfBoundsException {
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
-        String[] requestLine = br.readLine().split(SP);
+        // Http Request Line
+        HttpRequestLine httpRequestLine = new HttpRequestLine(br.readLine());
 
-        HttpMethod httpMethod = HttpMethod.valueOf(requestLine[METHOD_INDEX]);
-        String path = requestLine[URI_INDEX];
+        // Http Header
         HttpHeader httpHeader = parseHttpHeader(br);
 
+        // Http Request Body
         HttpRequestBody requestBody = new HttpRequestBody();
-
         if (hasContent(httpHeader)) {
             int contentLength = Integer.parseInt(httpHeader.get(CONTENT_LENGTH));
 
@@ -37,7 +32,7 @@ public record HttpRequestMessage(HttpMethod method, URI uri, HttpHeader header, 
             requestBody.addAll(HttpRequestUtils.parseQueryString(data));
         }
 
-        return new HttpRequestMessage(httpMethod, URI.create(path), httpHeader, requestBody);
+        return new HttpRequestMessage(httpRequestLine, httpHeader, requestBody);
     }
 
     private static HttpHeader parseHttpHeader(BufferedReader br) throws IOException {
@@ -53,5 +48,14 @@ public record HttpRequestMessage(HttpMethod method, URI uri, HttpHeader header, 
 
     private static boolean hasContent(HttpHeader httpHeader) {
         return httpHeader.keySet().contains(CONTENT_LENGTH);
+    }
+
+
+    public HttpMethod method() {
+        return this.requestLine.getMethod();
+    }
+
+    public URI uri() {
+        return this.requestLine.getUri();
     }
 }
