@@ -44,11 +44,15 @@ public class HttpRequest {
 		return requestLine;
 	}
 
+	public String getRequestURIPath() {
+		return requestLine.getPath();
+	}
+
 	public RequestHeaders getRequestHeaders() {
 		return requestHeaders;
 	}
 
-	public RequestMessageBody getRequestMessageBody() {
-		return requestMessageBody;
+	public String getMessageBody() {
+		return requestMessageBody.getMessageBody();
 	}
 }

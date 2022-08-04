@@ -61,13 +61,13 @@ class HttpRequestTest {
 					+ "Accept: */*\r\n"
 					+ "\r\n"
 					+"userId=nathan&password=123123&name=나단&email=nathan@dev.com";
-				//TODO Content-Length, Content-Type 추가 해야한다.
+
 				//when
 				ByteArrayInputStream in = new ByteArrayInputStream(str.getBytes());
 				HttpRequest httpRequest = HttpRequest.from(in);
 				RequestLine requestLine = httpRequest.getRequestLine();
 				RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
-				RequestMessageBody requestMessageBody = httpRequest.getRequestMessageBody();
+				String requestMessageBody = httpRequest.getMessageBody();
 
 				//then
 				assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.POST);
@@ -79,7 +79,7 @@ class HttpRequestTest {
 				assertThat(requestHeaders.getContentLength()).isEqualTo(58);
 				assertThat(requestHeaders.getHeader("Content-Type")).isEqualTo(
 					"application/x-www-form-urlencoded");
-				assertThat(requestMessageBody.getMessageBody()).isEqualTo(
+				assertThat(httpRequest.getMessageBody()).isEqualTo(
 					"userId=nathan&password=123123&name=나단&email=nathan@dev.com");
 			}
 		}
