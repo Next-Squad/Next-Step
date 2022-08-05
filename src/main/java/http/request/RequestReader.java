@@ -1,4 +1,4 @@
-package request;
+package http.request;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static util.IOUtils.readData;
@@ -15,27 +15,24 @@ import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
 import util.HttpRequestUtils.Pair;
 
-public class HttpRequest {
+public class RequestReader {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestReader.class);
 
-    private final BufferedReader bufferedReader;
-    private final String method;
-    private final String url;
-    private final String protocol;
-    private final Map<String, String> header;
-    private final Map<String, String> body;
-    private final Cookie cookie;
+    private BufferedReader bufferedReader;
 
-    public HttpRequest(InputStream in) throws IOException {
+    public RequestReader(InputStream in) throws IOException {
         this.bufferedReader = new BufferedReader(new InputStreamReader(in));
+    }
+
+    public HttpRequest create() throws IOException {
         String[] line = bufferedReader.readLine().split(" ");
-        this.method = line[0];
-        this.url = line[1];
-        this.protocol = line[2];
-        this.header = parseHeader();
-        this.body = parseBody();
-        this.cookie = parseCookie();
+        String method = line[0];
+        String url = line[1];
+        String protocol = line[2];
+        Map<String, String> header = parseHeader();
+        Map<String, String> body = parseBody(header);
+        return new HttpRequest(header, body, method, url, protocol);
     }
 
     private Map<String, String> parseHeader() throws IOException {
@@ -49,14 +46,9 @@ public class HttpRequest {
         return header;
     }
 
-    private Map<String, String> parseBody() throws IOException {
-        int contentLength = getContentLength();
+    private Map<String, String> parseBody(Map<String, String> header) throws IOException {
+        int contentLength = getContentLength(header);
         return getBodyData(contentLength);
-    }
-
-    private Cookie parseCookie() {
-        Map<String, String> cookie = HttpRequestUtils.parseCookies(header.get("Cookie"));
-        return new Cookie(cookie.get("isLogined"), cookie.get("path"));
     }
 
     private Map<String, String> getBodyData(int contentLength) throws IOException {
@@ -65,34 +57,10 @@ public class HttpRequest {
         return HttpRequestUtils.parseQueryString(decode);
     }
 
-    private int getContentLength() {
+    private int getContentLength(Map<String, String> header) {
         if (header.containsKey("Content-Length")) {
             return Integer.parseInt(header.get("Content-Length"));
         }
         return 0;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public Map<String, String> getHeader() {
-        return header;
-    }
-
-    public Map<String, String> getBody() {
-        return body;
-    }
-
-    public Cookie getCookie() {
-        return cookie;
     }
 }

@@ -33,7 +33,9 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            HttpRequest httpRequest = new HttpRequest(in);
+            RequestReader requestReader = new RequestReader(in);
+            HttpResponse httpResponse = new HttpResponse(out);
+            requestReader.create();
 
             // create user
             if ("/user/create".equals(httpRequest.getUrl())) {
