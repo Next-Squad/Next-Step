@@ -30,4 +30,12 @@ public class HttpRequest {
         Map<String, String> cookie = HttpRequestUtils.parseCookies(header.get("Cookie"));
         return new Cookie(cookie.get("isLogined"), cookie.get("path"));
     }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 }
