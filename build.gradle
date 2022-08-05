@@ -34,6 +34,20 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-dbcp2', version: '2.9.0'
     // https://mvnrepository.com/artifact/com.h2database/h2
     implementation group: 'com.h2database', name: 'h2', version: '2.1.210'
+
+    // EMBED TOMCAT 관련 설정
+    // tomcat-embed-core
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:10.1.0-M17'
+    // https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-logging-juli
+    implementation 'org.apache.tomcat.embed:tomcat-embed-logging-juli:9.0.0.M6'
+    // https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-jasper
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper:10.1.0-M17'
+    // https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-jasper
+    implementation 'org.apache.tomcat:tomcat-jasper:10.1.0-M17'
+    // https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-el
+    implementation 'org.apache.tomcat.embed:tomcat-embed-el:10.1.0-M17'
+    // https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-jsp-api
+    implementation 'org.apache.tomcat:tomcat-jsp-api:10.1.0-M17'
 }
 
 test {
