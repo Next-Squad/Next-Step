@@ -3,7 +3,6 @@ package dev.kukim.controller;
 import dev.kukim.db.DataBase;
 import dev.kukim.model.User;
 import dev.kukim.webserver.http.request.HttpRequest;
-import dev.kukim.webserver.http.request.domain.HttpMethod;
 import dev.kukim.webserver.http.response.HttpResponse;
 import java.io.IOException;
 import org.slf4j.Logger;
@@ -16,15 +15,6 @@ public class UserCreateController extends AbstractController {
 
 	public static Controller getInstance() {
 		return instance;
-	}
-
-	@Override
-	public void process(HttpRequest request, HttpResponse response) throws IOException {
-		if (request.getMethod().equals(HttpMethod.GET)) {
-			doGet(request, response);
-		} else if (request.getMethod().equals(HttpMethod.POST)) {
-			doPost(request, response);
-		}
 	}
 
 	@Override

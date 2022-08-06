@@ -10,7 +10,6 @@ public class ResourceController extends AbstractController {
 
 	public static final String CLASSPATH_STATIC_RESOURCE = "./src/main/resources/static";
 
-
 	@Override
 	protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
 		setResource(request, response);
