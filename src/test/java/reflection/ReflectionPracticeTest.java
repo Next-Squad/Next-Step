@@ -1,7 +1,9 @@
 package reflection;
 
 import com.google.common.reflect.ClassPath;
+import db.DataBase;
 import handler.Component;
+import model.User;
 import org.junit.jupiter.api.Test;
 import service.UserService;
 import webserver.Request.HttpMethod;
@@ -31,7 +33,7 @@ class ReflectionPracticeTest {
 
 
     @Test
-    void userSave_invoke_no_return_test() throws InvocationTargetException, IllegalAccessException {
+    void userSave_invoke_test() throws InvocationTargetException, IllegalAccessException {
         UserService userService = new UserService();
         Class<? extends UserService> userServiceClass = userService.getClass();
         Method[] declaredMethods = userServiceClass.getDeclaredMethods();
@@ -40,6 +42,13 @@ class ReflectionPracticeTest {
                 declaredMethod.invoke(userService, "userId", "password", "name", "email@email.com");
             }
         }
+        User user = DataBase.findUserById("userId").get();
+
+        assertThat(user.getUserId()).isEqualTo("userId");
+        assertThat(user.isSamePassword("password")).isTrue();
+        assertThat(user.getName()).isEqualTo("name");
+        assertThat(user.getEmail()).isEqualTo("email@email.com");
+
     }
 
     @Test

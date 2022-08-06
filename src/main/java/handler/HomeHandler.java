@@ -8,7 +8,7 @@ import webserver.Request.Request;
 import webserver.Response.Response;
 
 @Component
-public class HomeHandler implements Handler{
+public class HomeHandler implements Handler {
 
     @Override
     @RequestMapping(httpMethod = HttpMethod.GET, path = "/")

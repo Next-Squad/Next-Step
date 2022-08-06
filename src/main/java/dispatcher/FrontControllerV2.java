@@ -2,10 +2,8 @@ package dispatcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import webserver.Request.HttpMethod;
 import webserver.Request.Request;
 import webserver.Response.Response;
-import webserver.WebServer;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -24,6 +22,7 @@ public class FrontControllerV2 {
         try {
             return handler.invoke(request, response);
         } catch (InvocationTargetException | IllegalAccessException e) {
+            e.printStackTrace();
             throw new RuntimeException();
         }
     }
