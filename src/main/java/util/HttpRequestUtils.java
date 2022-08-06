@@ -1,16 +1,26 @@
 package util;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
+import webserver.Header;
+import webserver.Request.HttpMethod;
+import webserver.Request.Request;
+import webserver.Request.RequestLine;
+import webserver.Request.Uri;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
-
 public class HttpRequestUtils {
     /**
-     * @param queryString은
-     *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
+     * @param queryString URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
      * @return
      */
     public static Map<String, String> parseQueryString(String queryString) {
@@ -18,12 +28,48 @@ public class HttpRequestUtils {
     }
 
     /**
-     * @param 쿠키
-     *            값은 name1=value1; name2=value2 형식임
+     * @param 쿠키 값은 name1=value1; name2=value2 형식임
      * @return
      */
     public static Map<String, String> parseCookies(String cookies) {
         return parseValues(cookies, ";");
+    }
+
+
+    public static Request toRequest(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        String line = bufferedReader.readLine();
+        RequestLine requestLine = parseRequestLine(line);
+
+        Map<String, String> headers = new HashMap<>();
+        while (!(line = bufferedReader.readLine()).isEmpty()) {
+            Pair header = parseHeader(line);
+            headers.put(header.key, header.value);
+        }
+
+        if (headers.containsKey("Content-Length")) {
+            String contentLength = headers.get("Content-Length");
+            String body = IOUtils.readData(bufferedReader, Integer.parseInt(contentLength));
+            return Request.post(requestLine, new Header(headers), body);
+        }
+
+        return Request.get(requestLine, new Header(headers));
+    }
+
+    private static RequestLine parseRequestLine(String requestLine) {
+        String[] tokens = requestLine.split(" ");
+        if (tokens.length < 3) {
+            throw new IllegalArgumentException();
+        }
+        return new RequestLine(HttpMethod.from(tokens[0]), parseUri(tokens[1]), tokens[2]);
+    }
+
+    private static Uri parseUri(String uri) {
+        if (uri.contains("?")) {
+            String[] tokens = uri.split("\\?");
+            return Uri.of(tokens[0], tokens[1]);
+        }
+        return Uri.simplePath(uri);
     }
 
     private static Map<String, String> parseValues(String values, String separator) {
