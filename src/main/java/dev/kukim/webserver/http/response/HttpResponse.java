@@ -49,4 +49,11 @@ public class HttpResponse {
 	public void setContentType(String contentType) {
 		headers.add("Content-Type", contentType);
 	}
+
+	public void responseMethodNotAllowed() throws IOException {
+		dos.writeBytes("HTTP/1.1 405 Method Not Allowed \r\n");
+		writeHeaders();
+		dos.flush();
+
+	}
 }
