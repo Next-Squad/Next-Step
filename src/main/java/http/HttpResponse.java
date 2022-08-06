@@ -37,6 +37,13 @@ public class HttpResponse {
         }
     }
 
+    public void forwardBody(byte[] body) {
+        header.put("Content-Type", "text/html;charset=uft-8");
+        header.put("Content-length", body.length + "");
+        response200Header(body.length);
+        responseBody(body);
+    }
+
     public void response200Header(int length) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
@@ -76,6 +83,7 @@ public class HttpResponse {
             log.error(e.getMessage());
         }
     }
+
 
     public void addHeader(String key, String value) {
         header.put(key, value);
