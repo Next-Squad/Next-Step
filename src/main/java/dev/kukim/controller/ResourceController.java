@@ -6,12 +6,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class ResourceController implements Controller {
+public class ResourceController extends AbstractController {
 
 	public static final String CLASSPATH_STATIC_RESOURCE = "./src/main/resources/static";
 
+
 	@Override
-	public void process(HttpRequest request, HttpResponse response) throws IOException {
+	protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
 		setResource(request, response);
 		response.sendOK();
 	}

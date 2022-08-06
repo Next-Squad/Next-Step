@@ -9,7 +9,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserCreateController implements Controller{
+public class UserCreateController extends AbstractController {
 
 	private static final UserCreateController instance = new UserCreateController();
 	private static final Logger log = LoggerFactory.getLogger(UserCreateController.class);
@@ -27,7 +27,8 @@ public class UserCreateController implements Controller{
 		}
 	}
 
-	private void doGet(HttpRequest request, HttpResponse response) throws IOException {
+	@Override
+	protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
 		User user = new User(request.getQueryParameter("userId"),
 			request.getQueryParameter("password"),
 			request.getQueryParameter("name"),
@@ -39,7 +40,8 @@ public class UserCreateController implements Controller{
 		response.sendRedirect("/index.html");
 	}
 
-	private void doPost(HttpRequest request, HttpResponse response) throws IOException {
+	@Override
+	protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
 		User user = new User(request.getBodyQueryParameter("userId"),
 			request.getBodyQueryParameter("password"),
 			request.getBodyQueryParameter("name"),
@@ -49,6 +51,5 @@ public class UserCreateController implements Controller{
 		log.info("Create User : {}", user);
 
 		response.sendRedirect("/index.html");
-
 	}
 }
