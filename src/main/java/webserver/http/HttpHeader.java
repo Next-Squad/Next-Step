@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class HttpHeader{
+public class HttpHeader {
+
+    public static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, String> header = new HashMap<>();
 
     public void add(String key, String value) {
