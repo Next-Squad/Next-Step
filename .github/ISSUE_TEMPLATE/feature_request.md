@@ -1,4 +1,4 @@
-
+---
 name: Feature Request
 about: Suggest new Feature Request for this project
 title: "{ISSUE_TITLE}"

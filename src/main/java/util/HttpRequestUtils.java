@@ -1,12 +1,10 @@
 package util;
 
-import http.request.RequestLine;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 
 public class HttpRequestUtils {
 
@@ -14,8 +12,8 @@ public class HttpRequestUtils {
      * @param queryString은 URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
      * @return
      */
-    public static RequestLine parseRequestLine(String requestLine) {
-        return RequestLine.from(requestLine.split(" "));
+    public static String[] parseRequestLine(String line) {
+        return line.split(" ");
     }
 
     public static Map<String, String> parseQueryString(String queryString) {

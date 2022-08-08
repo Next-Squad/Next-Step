@@ -1,5 +1,6 @@
 package http.response;
 
+import http.Cookie;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,8 +28,8 @@ public class ResponseHeaders {
 		headers.put("Location", redirectURI);
 	}
 
-	public void setCookie(boolean cookie) {
-		headers.put("Set-Cookie", "logined=" + cookie + "; path=/;");
+	public void setCookie(Cookie cookie) {
+		headers.put("Set-Cookie", cookie + " path=/;");
 	}
 
 	public void setAccept(String content) {
