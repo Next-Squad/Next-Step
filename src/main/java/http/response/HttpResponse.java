@@ -1,5 +1,6 @@
 package http.response;
 
+import http.Cookie;
 import http.HttpVersion;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -12,18 +13,13 @@ import model.User;
 
 public class HttpResponse {
 
-	private final StatusLine statusLine;
-	private final ResponseHeaders responseHeaders;
+	private final DataOutputStream dos;
+	private StatusLine statusLine;
+	private final ResponseHeaders responseHeaders = new ResponseHeaders();
 	private ResponseMessageBody responseMessageBody;
 
-	public HttpResponse(StatusLine statusLine, ResponseHeaders responseHeaders) {
-		this.statusLine = statusLine;
-		this.responseHeaders = responseHeaders;
-	}
-
-	public HttpResponse(StatusLine statusLine, ResponseHeaders responseHeaders, ResponseMessageBody responseMessageBody) {
-		this(statusLine, responseHeaders);
-		this.responseMessageBody = responseMessageBody;
+	public HttpResponse(OutputStream out) {
+		this.dos = new DataOutputStream(out);
 	}
 
 	public StatusLine getStatusLine() {
@@ -34,31 +30,33 @@ public class HttpResponse {
 		return responseHeaders;
 	}
 
-	public static HttpResponse ok() {
-		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
-		byte[] messageBody = "Hello World".getBytes(StandardCharsets.UTF_8);
-		ResponseHeaders responseHeaders = new ResponseHeaders();
-		responseHeaders.setContentType("text/plain;charset=utf-8");
-		responseHeaders.setContentLength(messageBody.length);
-		ResponseMessageBody responseMessageBody = new ResponseMessageBody(messageBody);
-		return new HttpResponse(statusLine, responseHeaders, responseMessageBody);
+	public ResponseMessageBody getResponseMessageBody() {
+		return responseMessageBody;
 	}
 
-	public static HttpResponse ok(String viewName) throws IOException {
+	public void ok() throws IOException {
+		statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
+		byte[] messageBody = "Hello World".getBytes(StandardCharsets.UTF_8);
+		responseHeaders.setContentType("text/plain;charset=utf-8");
+		responseHeaders.setContentLength(messageBody.length);
+		responseMessageBody = new ResponseMessageBody(messageBody);
+		flush();
+	}
+
+	public void ok(String viewName) throws IOException {
 		byte[] messageBody = Files.readAllBytes(new File("./webapp" + viewName).toPath());
-		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
+		statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
 		String[] urlTokens = viewName.split("\\.");
 		String extension = urlTokens[urlTokens.length - 1];
 
-		ResponseHeaders responseHeaders = new ResponseHeaders();
 		responseHeaders.setContentType("text/"+extension+";charset=utf-8");
 		responseHeaders.setAccept("text/"+extension+", */*; q=0.1");
 		responseHeaders.setContentLength(messageBody.length);
-		ResponseMessageBody responseMessageBody = new ResponseMessageBody(messageBody);
-		return new HttpResponse(statusLine, responseHeaders, responseMessageBody);
+		responseMessageBody = new ResponseMessageBody(messageBody);
+		flush();
 	}
 
-	public static HttpResponse ok(String viewName, List<User> users) throws IOException {
+	public void ok(String viewName, List<User> users) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		List<String> fileLines = Files.readAllLines(new File("./webapp" + viewName).toPath());
 		for (String fileLine : fileLines) {
@@ -80,34 +78,30 @@ public class HttpResponse {
 			sb.append(fileLine).append("\r\n");
 		}
 		byte[] messageBody = sb.toString().getBytes(StandardCharsets.UTF_8);
-		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
-		ResponseHeaders responseHeaders = new ResponseHeaders();
+		statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.OK);
 		responseHeaders.setContentType("text/html;charset=utf-8");
 		responseHeaders.setContentLength(messageBody.length);
-		ResponseMessageBody responseMessageBody = new ResponseMessageBody(messageBody);
-		return new HttpResponse(statusLine, responseHeaders, responseMessageBody);
+		responseMessageBody = new ResponseMessageBody(messageBody);
+		flush();
 	}
 
-	public static HttpResponse found(String redirectURI) {
-		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.FOUND);
-		ResponseHeaders responseHeaders = new ResponseHeaders();
+	public void found(String redirectURI) throws IOException {
+		statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.FOUND);
 		responseHeaders.setContentType("text/html;charset=utf-8");
 		responseHeaders.setLocation(redirectURI);
-		responseHeaders.setCookie(false);
-		return new HttpResponse(statusLine, responseHeaders);
+		responseHeaders.setCookie(new Cookie("logined", "false"));
+		flush();
 	}
 
-	public static HttpResponse found(String redirectURI, boolean cookie) {
-		StatusLine statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.FOUND);
-		ResponseHeaders responseHeaders = new ResponseHeaders();
+	public void found(String redirectURI, Cookie cookie) throws IOException {
+		statusLine = new StatusLine(new HttpVersion("HTTP/1.1"), HttpResponseStatus.FOUND);
 		responseHeaders.setContentType("text/html;charset=utf-8");
 		responseHeaders.setLocation(redirectURI);
 		responseHeaders.setCookie(cookie);
-		return new HttpResponse(statusLine, responseHeaders);
+		flush();
 	}
 
-	public void flush(OutputStream out) throws IOException {
-		DataOutputStream dos = new DataOutputStream(out);
+	private void flush() throws IOException {
 		dos.writeBytes(statusLine.toString() + " \r\n");
 		dos.writeBytes(responseHeaders.toString());
 		dos.writeBytes("\r\n");

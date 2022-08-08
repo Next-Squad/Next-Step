@@ -35,6 +35,10 @@ public class RequestLine {
 		return httpVersion;
 	}
 
+	public String getPath() {
+		return requestUri.getPath();
+	}
+
 	@Override
 	public String toString() {
 		return httpMethod.toString() + " "

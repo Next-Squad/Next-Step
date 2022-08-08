@@ -3,9 +3,10 @@ package http.response;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import http.Cookie;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import org.junit.jupiter.api.DisplayName;
@@ -25,9 +26,13 @@ class HttpResponseTest {
 
 			@Test
 			@DisplayName("default 200 OK HttpResponse 객체를 반환한다.")
-			void dit_returns_default_200_OK_HttpResponse_instance() {
+			void dit_returns_default_200_OK_HttpResponse_instance() throws IOException {
+				//given
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				HttpResponse response = new HttpResponse(out);
+
 				//when
-				HttpResponse response = HttpResponse.ok();
+				response.ok();
 				StatusLine statusLine = response.getStatusLine();
 				ResponseHeaders responseHeaders = response.getResponseHeaders();
 
@@ -50,9 +55,11 @@ class HttpResponseTest {
 				//given
 				String viewName = "/index.html";
 				byte[] messageBody = Files.readAllBytes(new File("./webapp" + viewName).toPath());
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				HttpResponse response = new HttpResponse(out);
 
 				//when
-				HttpResponse response = HttpResponse.ok(viewName);
+				response.ok(viewName);
 				StatusLine statusLine = response.getStatusLine();
 				ResponseHeaders responseHeaders = response.getResponseHeaders();
 
@@ -69,9 +76,11 @@ class HttpResponseTest {
 			void it_throws_NoSuchFileException() throws IOException {
 				//given
 				String viewName = "/indexing.html";
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				HttpResponse response = new HttpResponse(out);
 
 				//then
-				assertThatThrownBy(() -> HttpResponse.ok(viewName)).isInstanceOf(
+				assertThatThrownBy(() -> response.ok(viewName)).isInstanceOf(
 					NoSuchFileException.class);
 			}
 
@@ -88,12 +97,14 @@ class HttpResponseTest {
 
 			@Test
 			@DisplayName("해당 인자를 Location으로 갖는 302 Found HttpResponse 객체를 반환한다.")
-			void it_returns_302_Found_HttpResponse_instance() {
+			void it_returns_302_Found_HttpResponse_instance() throws IOException {
 				//given
 				String redirectURI = "/index.html";
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				HttpResponse response = new HttpResponse(out);
 
 				//when
-				HttpResponse response = HttpResponse.found(redirectURI);
+				response.found(redirectURI);
 				StatusLine statusLine = response.getStatusLine();
 				ResponseHeaders responseHeaders = response.getResponseHeaders();
 
@@ -110,13 +121,15 @@ class HttpResponseTest {
 
 			@Test
 			@DisplayName("해당 인자를 Location으로 갖고, Cookie가 세팅된 302 Found HttpResponse 객체를 반환한다.")
-			void it_returns_302_Found_HttpResponse_instance_with_Cookie() {
+			void it_returns_302_Found_HttpResponse_instance_with_Cookie() throws IOException {
 				//given
 				String redirectURI = "/index.html";
-				boolean login_cookie = true;
+				Cookie cookie = new Cookie("logined", "true");
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				HttpResponse response = new HttpResponse(out);
 
 				//when
-				HttpResponse response = HttpResponse.found(redirectURI, login_cookie);
+				response.found(redirectURI, cookie);
 				StatusLine statusLine = response.getStatusLine();
 				ResponseHeaders responseHeaders = response.getResponseHeaders();
 
