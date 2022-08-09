@@ -1,4 +1,4 @@
-package next;
+package web;
 
 import java.io.File;
 import org.apache.catalina.startup.Tomcat;
