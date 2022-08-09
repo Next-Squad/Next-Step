@@ -48,6 +48,7 @@ out/
 
 # Package Files #
 *.jar
+!h2-1.3.167.jar
 *.war
 *.nar
 *.ear
@@ -203,4 +204,3 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-
