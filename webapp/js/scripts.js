@@ -1,4 +1,3 @@
-
 $(document).ready(function(){/* jQuery toggle layout */
 $('#btnToggle').click(function(){
   if ($(this).hasClass('on')) {
