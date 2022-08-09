@@ -20,16 +20,17 @@ public class HttpResponse {
     public HttpResponse(OutputStream out) {
         dos = new DataOutputStream(out);
     }
-
     public void forward(String url) {
         try {
             byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
             if (url.endsWith(".css")) {
                 header.put("Content-Type", "text/css");
+            } else if (url.endsWith(".js")){
+                header.put("Content-Type", "application/javascript");
             } else {
                 header.put("Content-Type", "text/html;charset=uft-8");
             }
-            header.put("Content-length", body.length + "");
+            header.put("Content-Length", body.length + "");
             response200Header(body.length);
             responseBody(body);
         } catch (IOException e) {
@@ -39,12 +40,12 @@ public class HttpResponse {
 
     public void forwardBody(byte[] body) {
         header.put("Content-Type", "text/html;charset=uft-8");
-        header.put("Content-length", body.length + "");
+        header.put("Content-Length", body.length + "");
         response200Header(body.length);
         responseBody(body);
     }
 
-    public void response200Header(int length) {
+    public void response200Header(int lengthOfBody) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             writeHeaders();
@@ -57,6 +58,7 @@ public class HttpResponse {
     public void responseBody(byte[] body) {
         try {
             dos.write(body, 0, body.length);
+            dos.writeBytes("\r\n");
             dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
