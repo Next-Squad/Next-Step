@@ -33,8 +33,8 @@ public class HttpRequest {
             }
 
             line = br.readLine();
-            log.debug("라인: {}", line);
             while (!line.equals("")) {
+                log.debug("헤더: {}", line);
                 String[] split = line.split(":");
                 header.put(split[0].trim(), split[1].trim());
                 line = br.readLine();
@@ -50,16 +50,22 @@ public class HttpRequest {
     }
 
     public void parseRequestLine(String line){
+        log.debug("라인: {}", line);
         String[] parsedLines = line.split(" ");
         method = parsedLines[0];
         if (method.equals("POST")){
             path = parsedLines[1];
             return;
         }
-        String[] split1 = parsedLines[1].split("[?]");
-        path = split1[0];
-        parameter = HttpRequestUtils.parseQueryString(split1[1]);
-        log.debug("유저아이디: {}, 비밀번호: {}, 유저이름: {}", parameter.get("userId"), parameter.get("password"), parameter.get("name"));
+
+        int index = parsedLines[1].indexOf("?");
+        if (index == -1) {
+            path = parsedLines[1];
+        } else {
+            path = parsedLines[1].substring(0, index);
+            parameter = HttpRequestUtils.parseQueryString(parsedLines[1].substring(index+1));
+        }
+//        log.debug("유저아이디: {}, 비밀번호: {}, 유저이름: {}", parameter.get("userId"), parameter.get("password"), parameter.get("name"));
     }
 
     public String getMethod() {
