@@ -1,21 +1,19 @@
 package webserver;
 
-import java.io.*;
-import java.net.Socket;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import db.DataBase;
+import http.HttpRequest;
 import http.HttpResponse;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
-import util.IOUtils;
+
+import java.io.*;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class RequestHandler extends Thread {
@@ -32,66 +30,37 @@ public class RequestHandler extends Thread {
                 connection.getPort());
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            // 3.4.3.1 1단계: 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+            HttpRequest httpRequest = new HttpRequest(in);
             HttpResponse httpResponse = new HttpResponse(out);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            String line = br.readLine();
-            log.debug("request line: {}", line);
-            String url = parseLine(line);
+            String path = httpRequest.getPath();
 
-            int contentLength = 0;
-            Map<String, String> cookies = new HashMap<>();
-            //2단계 + 3단계
-            if (line == null) {
-                return;
-            }
-            while (!line.equals("")){
-                line = br.readLine();
-                if (line.contains("Content-Length")){
-                    contentLength = getContentLength(line);
-                }
-                if (line.contains("Cookie")){
-                    cookies = HttpRequestUtils.parseCookies(line);
-                    log.debug("쿠키: {}", cookies);
-                }
-                if(line.contains("Accept: text/css")){
-                    httpResponse.forward(url);
-                }
-                log.debug("header: {}", line);
-            }
 
-            if (url.startsWith("/user/create")){
+            if (("/user/create").equals(path)){
+                User user = new User(httpRequest.getParameter("userId"), httpRequest.getParameter("password"),
+                        httpRequest.getParameter("name"), httpRequest.getParameter("email"));
 
-                String body = URLDecoder.decode(IOUtils.readData(br, contentLength), StandardCharsets.UTF_8);
-                log.debug("바디: {}", body);
-                Map<String, String> params = HttpRequestUtils.parseQueryString(body);
-                User user = new User(params.get("userId"), params.get("password"), params.get("name"),
-                        params.get("email"));
                 DataBase.addUser(user);
                 log.debug("user: {}", user);
 
                 httpResponse.sendRedirect("/index.html");
 
-            } else if (url.equals("/user/login")){
-                String body = IOUtils.readData(br, contentLength);
-                Map<String, String> params = HttpRequestUtils.parseQueryString(body);
-                User user = DataBase.findUserById(params.get("userId"));
+            } else if (("/user/login").equals(path)){
+                User user = DataBase.findUserById(httpRequest.getParameter("userId"));
                 log.debug("로그인유저: {}", user );
 
                 if (user == null) {
                     httpResponse.forward("/user/login_failed.html");
                     return;
                 }
-                if (user.getPassword().equals(params.get("password"))){
+                if (user.getPassword().equals(httpRequest.getParameter("password"))){
                     httpResponse.addHeader("Set-Cookie", "logined=true");
                     httpResponse.sendRedirect("/index.html");
                 } else {
                     httpResponse.sendRedirect("/user/login_failed.html");
                 }
 
-            } else if (url.equals("/user/list")){
-                if (cookies.get("logined").equals("true")) {
-                    log.debug("쿠키확인: {}" , cookies.get("logined"));
+            } else if (("/user/list").equals(path)){
+                if (isLogined(httpRequest.getHeader("Cookie"))) {
                     Collection<User> users = DataBase.findAll();
                     StringBuilder sb = new StringBuilder();
                     sb.append("<table>");
@@ -114,20 +83,19 @@ public class RequestHandler extends Thread {
                 }
 
             } else {
-                httpResponse.forward(url);
+                httpResponse.forward(path);
             }
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private int getContentLength(String line) {
-        String[] split = line.split(":");
-        return Integer.parseInt(split[1].trim());
-    }
-
-    private String parseLine(String line){
-        String[] parsedLines = line.split(" ");
-        return parsedLines[1];
+    //TODO: HttpRequest에 있어야 하는게 맞겠지..? 생각해보기.
+    private boolean isLogined(String cookie) {
+        Map<String, String> cookies = HttpRequestUtils.parseCookies(cookie);
+        if(cookies.get("logined") != null && cookies.get("logined").equals("true")) {
+            return true;
+        }
+        return false;
     }
 }
