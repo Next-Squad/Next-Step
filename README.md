@@ -1,15 +1,16 @@
-# Next Step
+# Next Step : 2-MVC-Framework
 
-책 [자바 웹 프로그래밍 NextStep - 박재성](http://www.yes24.com/Product/goods/31869154?scode=032&OzSrank=4) 스터디를 위한 저장소입니다.
+책 [자바 웹 프로그래밍 NextStep - 박재성](http://www.yes24.com/Product/goods/31869154?scode=032&OzSrank=4) 내용 중 `프레임워크 구현` 을 위한 저장소입니다.
 
+기본 브랜치 : `2-mvc-framework`
 
 ---
 
 
 ### 🎙 진행 방식
 
-- 해당 저장소를 Fork 합니다.
-- 정해진 기간동안 특정 주제를 각자 구현하고 개인 GitHub id 브랜치로 (e.g. ku-kim) `Pull requests` 합니다.
+- 해당 저장소/브랜치를 Fork 합니다.
+- 정해진 기간동안 특정 주제를 각자 구현하고 개인 GitHub id 브랜치로 (e.g. ku-kim-2-mvc-framework) `Pull requests` 합니다.
 - 정답을 보지 않고 구현합니다.
 - 스터디 일정, PR 제출 확인은 [📒 Wiki](https://github.com/Next-Squad/Next-Step/wiki)를 활용합니다.
 - 토론 또는 기타 질문 사항은 `Issues`를 활용합니다.
@@ -17,6 +18,7 @@
 
 ### ⛓ Reference
 - [책 Next Step 공식 저장소](https://github.com/slipp/jwp-book)
+- [next step jwp mvc gradle repository](https://github.com/next-step/jwp-mvc)
 - [책 Next Step 3 ~ 6장 실습 저장소](https://github.com/slipp/web-application-server)
 - [책 Next Step 7 ~ 6장 실습 저장소](https://github.com/slipp/jwp-basic)
 - [이펙티브 자바](http://www.yes24.com/Product/Goods/65551284)
