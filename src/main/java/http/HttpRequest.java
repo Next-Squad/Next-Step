@@ -22,7 +22,7 @@ public class HttpRequest {
     private Map<String,String> parameter = new HashMap<>();
 
     public HttpRequest(InputStream in) {
-        try(in){
+        try {
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
             String line = br.readLine();
             parseRequestLine(line);
