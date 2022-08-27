@@ -36,7 +36,8 @@ public class LoginServlet extends HttpServlet {
 
 		if (Objects.isNull(loginUser) || !loginUser.checkPassword(password)) {
 			log.debug("login 실패");
-			RequestDispatcher rd = req.getRequestDispatcher("/user/login_failed.html");
+			req.setAttribute("loginFailed", true);
+			RequestDispatcher rd = req.getRequestDispatcher("/user/login.jsp");
 			rd.forward(req, resp);
 		} else {
 			log.debug("login user : {} 성공", loginUser.getUserId());
