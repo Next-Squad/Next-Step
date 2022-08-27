@@ -26,4 +26,23 @@ public class LoginServlet extends HttpServlet {
 		rd.forward(req, resp);
 	}
 
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+		throws ServletException, IOException {
+		String userId = req.getParameter("userId");
+		String password = req.getParameter("password");
+
+		User loginUser = DataBase.findUserById(userId);
+
+		if (Objects.isNull(loginUser) || !loginUser.checkPassword(password)) {
+			log.debug("login 실패");
+			RequestDispatcher rd = req.getRequestDispatcher("/user/login_failed.html");
+			rd.forward(req, resp);
+		} else {
+			log.debug("login user : {} 성공", loginUser.getUserId());
+			HttpSession session = req.getSession();
+			session.setAttribute("user", loginUser);
+			resp.sendRedirect("/");
+		}
+	}
 }
