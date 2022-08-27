@@ -76,7 +76,7 @@
                 <div class="form-group">
                     <label>사용자 아이디</label>
 <%--                    <input type="text" name="name" value = "${user.name}" />--%>
-<%--                    <input type="hidden" name="userId" value="${user.userId}" />--%>
+                    <input type="hidden" name="userId" value="${user.userId}" />
                     <div> ${user.userId}  </div>
                 </div>
                 <div class="form-group">
