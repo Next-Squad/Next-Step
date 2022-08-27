@@ -66,4 +66,14 @@ public class User {
         return true;
     }
 
+    public void update(User updateUser) {
+        this.userId = updateUser.getUserId();
+        this.password = updateUser.getPassword();
+        this.name = updateUser.getName();
+        this.email = updateUser.getEmail();
+    }
+
+    public boolean checkPassword(String password) {
+        return this.password.equals(password);
+    }
 }
