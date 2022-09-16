@@ -28,7 +28,7 @@ public class FrontController {
 
 	public void service(HttpRequest request, HttpResponse response) throws IOException {
 		Controller controller = getController(request);
-		controller.process(request, response);
+		controller.service(request, response);
 	}
 
 	private Controller getController(HttpRequest request) {

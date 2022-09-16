@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserLoginController implements Controller{
+public class UserLoginController extends AbstractController{
 
 	private static final UserLoginController instance = new UserLoginController();
 	private static final Logger log = LoggerFactory.getLogger(UserLoginController.class);
@@ -18,14 +18,7 @@ public class UserLoginController implements Controller{
 	}
 
 	@Override
-	public void process(HttpRequest request, HttpResponse response) throws IOException {
-		if (request.getMethod().equals(HttpMethod.POST)) {
-			doPost(request, response);
-		}
-
-	}
-
-	private void doPost(HttpRequest request, HttpResponse response) throws IOException {
+	protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
 		String requestUserId = request.getBodyQueryParameter("userId");
 		String requestPassword = request.getBodyQueryParameter("password");
 
