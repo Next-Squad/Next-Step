@@ -1,10 +1,9 @@
 package next.web.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@MyController
 public class HomeController implements Controller {
 
     @Override
