@@ -6,8 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import next.model.User;
+import next.web.CreateUserServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserDao {
+
     public void insert(User user) throws SQLException {
         Connection con = null;
         PreparedStatement pstmt = null;
