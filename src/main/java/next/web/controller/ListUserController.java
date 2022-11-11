@@ -1,4 +1,4 @@
-package next.web;
+package next.web.controller;
 
 import core.db.DataBase;
 import next.web.controller.Controller;
