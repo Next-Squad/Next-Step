@@ -10,4 +10,8 @@ public class HandlerMapping {
     public HandlerMapping(Map<HandlerKey, HandlerMethod> handlers) {
         this.handlers = handlers;
     }
+
+    public HandlerMethod getHandlerMethod(HandlerKey handlerKey) {
+        return handlers.get(handlerKey);
+    }
 }

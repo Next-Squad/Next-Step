@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 public class HomeController{
 
-    @RequestMapping(path = "/", method = RequestMethod.GET)
+    @RequestMapping(path = "/", requestMethod = RequestMethod.GET)
     public String showHome(HttpServletRequest request, HttpServletResponse response) throws Exception {
         return "home.jsp";
     }

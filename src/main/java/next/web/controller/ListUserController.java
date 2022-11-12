@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 @Controller
 public class ListUserController{
 
-    @RequestMapping(path = "/users", method = RequestMethod.GET)
+    @RequestMapping(path = "/users", requestMethod = RequestMethod.GET)
     public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.setAttribute("users", DataBase.findAll());
         return "/user/list.jsp";
