@@ -1,5 +1,6 @@
 package next.web;
 
+import next.di.AnnotationScanner;
 import next.web.controller.Controller;
 
 import javax.servlet.RequestDispatcher;
@@ -17,16 +18,19 @@ public class DispatcherServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        requestMapping = new RequestMapping();
+        AnnotationScanner annotationScanner = new AnnotationScanner("next.web.controller");
+        requestMapping = new RequestMapping(annotationScanner.extractController());
+        super.init();
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+        System.out.println(req.getRequestURI());
         Controller controller = requestMapping.getController(req.getRequestURI());
 
         try {
             String viewName = controller.execute(req, resp);
+            move(viewName, req, resp);
         } catch (Exception e) {
             throw new ServletException(e.getMessage());
         }
@@ -34,7 +38,6 @@ public class DispatcherServlet extends HttpServlet {
 
     private void move(String viewName, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         RequestDispatcher requestDispatcher = req.getRequestDispatcher(viewName);
-
         requestDispatcher.forward(req, resp);
     }
 

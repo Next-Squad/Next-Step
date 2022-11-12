@@ -12,9 +12,8 @@ public class RequestMapping {
 
     private final Map<String, Controller> mappings;
 
-    public RequestMapping() {
-        this.mappings = new HashMap<>();
-        initMapping();
+    public RequestMapping(Map<String, Controller> mappings) {
+        this.mappings = mappings;
     }
 
     private void initMapping() {
