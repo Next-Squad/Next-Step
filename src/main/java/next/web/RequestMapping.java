@@ -1,28 +1,16 @@
 package next.web;
 
-import next.web.controller.Controller;
-import next.web.controller.HomeController;
-import next.web.controller.ListUserController;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.annotation.*;
 
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+public @interface RequestMapping {
 
-public class RequestMapping {
-
-    private final Map<String, Controller> mappings;
-
-    public RequestMapping(Map<String, Controller> mappings) {
-        this.mappings = mappings;
-    }
-
-    private void initMapping() {
-        this.mappings.put("/user/list", new ListUserController());
-        this.mappings.put("/" , new HomeController());
-    }
-
-    public Controller getController(String uri) {
-        return mappings.get(uri);
-    }
+     String path() default "";
+     RequestMethod requestMethod();
 
 }
+

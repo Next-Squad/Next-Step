@@ -1,17 +1,16 @@
 package next.web.controller;
 
 import core.db.DataBase;
-import next.web.controller.Controller;
+import next.web.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.io.IOException;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-@MyController(path = "/user/list")
-public class ListUserController implements Controller {
 
-    @Override
+@Controller
+public class ListUserController{
+
+    @RequestMapping(path = "/users", method = RequestMethod.GET)
     public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.setAttribute("users", DataBase.findAll());
         return "/user/list.jsp";
